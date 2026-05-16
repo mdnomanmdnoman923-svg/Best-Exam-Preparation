@@ -1,67 +1,91 @@
-import { motion } from 'framer-motion'
-import { cn } from '@/lib/cn'
+// src/components/common/EmptyState.tsx
 
-interface EmptyStateProps {
-  icon?: string
-  title: string
-  description?: string
-  action?: React.ReactNode
-  className?: string
-}
+import React, { ReactNode } from 'react';
+import { motion } from 'framer-motion';
+import {
+  BookOpen,
+  Sparkles,
+} from 'lucide-react';
 
-export function EmptyState({ icon = '📭', title, description, action, className }: EmptyStateProps) {
+type EmptyStateProps = {
+  title: string;
+  description?: string;
+  icon?: ReactNode;
+  action?: ReactNode;
+  compact?: boolean;
+  className?: string;
+};
+
+export default function EmptyState({
+  title,
+  description = 'এখানে এখনো কোনো ডাটা পাওয়া যায়নি।',
+  icon,
+  action,
+  compact = false,
+  className = '',
+}: EmptyStateProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
-      className={cn(
-        'flex flex-col items-center justify-center py-16 px-6 text-center',
-        className
-      )}
+      transition={{ duration: 0.35 }}
+      className={[
+        'relative overflow-hidden rounded-3xl border border-white/10',
+        'bg-white/[0.04] backdrop-blur-2xl',
+        compact ? 'p-6' : 'p-10 md:p-14',
+        className,
+      ].join(' ')}
     >
-      <div className="text-5xl mb-4 animate-float">{icon}</div>
-      <h3 className="text-lg font-semibold text-bep-text mb-2 font-bengali">{title}</h3>
-      {description && (
-        <p className="text-bep-text-dim text-sm max-w-sm font-bengali">{description}</p>
-      )}
-      {action && <div className="mt-6">{action}</div>}
-    </motion.div>
-  )
-}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.10),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(168,85,247,0.10),transparent_28%)]" />
 
-interface ErrorStateProps {
-  title?: string
-  message?: string
-  onRetry?: () => void
-  className?: string
-}
-
-export function ErrorState({
-  title = 'কিছু একটা ভুল হয়েছে',
-  message = 'দয়া করে আবার চেষ্টা করুন',
-  onRetry,
-  className,
-}: ErrorStateProps) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      className={cn(
-        'flex flex-col items-center justify-center py-16 px-6 text-center',
-        className
-      )}
-    >
-      <div className="text-5xl mb-4">⚠️</div>
-      <h3 className="text-lg font-semibold text-bep-danger mb-2 font-bengali">{title}</h3>
-      <p className="text-bep-text-dim text-sm max-w-sm font-bengali">{message}</p>
-      {onRetry && (
-        <button
-          onClick={onRetry}
-          className="mt-6 btn-primary text-sm px-5 py-2.5"
+      <div className="relative z-10 flex flex-col items-center text-center">
+        <motion.div
+          animate={{
+            y: [0, -6, 0],
+          }}
+          transition={{
+            duration: 3,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+          className={[
+            'mb-6 flex items-center justify-center rounded-3xl border border-white/10',
+            'bg-gradient-to-br from-cyan-400/10 to-indigo-500/10',
+            compact ? 'h-20 w-20' : 'h-28 w-28',
+          ].join(' ')}
         >
-          আবার চেষ্টা করুন
-        </button>
-      )}
+          {icon ?? (
+            <div className="relative">
+              <BookOpen className="h-10 w-10 text-cyan-300" />
+              <Sparkles className="absolute -right-3 -top-2 h-5 w-5 text-yellow-300" />
+            </div>
+          )}
+        </motion.div>
+
+        <h3
+          className={[
+            'font-bold tracking-tight text-white',
+            compact ? 'text-xl' : 'text-2xl md:text-3xl',
+          ].join(' ')}
+        >
+          {title}
+        </h3>
+
+        <p
+          className={[
+            'mt-3 max-w-xl leading-7 text-white/65',
+            compact ? 'text-sm' : 'text-base',
+          ].join(' ')}
+        >
+          {description}
+        </p>
+
+        {action && (
+          <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+            {action}
+          </div>
+        )}
+      </div>
     </motion.div>
-  )
+  );
 }
