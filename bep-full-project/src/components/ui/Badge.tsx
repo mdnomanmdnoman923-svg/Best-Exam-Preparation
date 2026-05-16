@@ -1,32 +1,51 @@
-import { cva, type VariantProps } from 'class-variance-authority'
-import { cn } from '@/lib/cn'
+// src/components/ui/Badge.tsx
 
-const badgeVariants = cva(
-  'inline-flex items-center gap-1 rounded-full font-medium font-bengali',
-  {
-    variants: {
-      variant: {
-        default:  'bg-bep-primary/15 text-bep-primary border border-bep-primary/25',
-        success:  'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25',
-        warning:  'bg-amber-500/15 text-amber-400 border border-amber-500/25',
-        danger:   'bg-red-500/15 text-red-400 border border-red-500/25',
-        muted:    'bg-bep-surface text-bep-text-dim border border-bep-border',
-        gold:     'bg-amber-500/15 text-amber-300 border border-amber-500/30',
-        accent:   'bg-cyan-500/15 text-cyan-400 border border-cyan-500/25',
-      },
-      size: {
-        sm: 'text-xs px-2 py-0.5',
-        md: 'text-sm px-2.5 py-1',
-      },
-    },
-    defaultVariants: { variant: 'default', size: 'sm' },
-  }
-)
+import React from 'react';
+import { cn } from '@/lib/cn';
 
-interface BadgeProps
-  extends React.HTMLAttributes<HTMLSpanElement>,
-    VariantProps<typeof badgeVariants> {}
+export type BadgeVariant =
+  | 'default'
+  | 'secondary'
+  | 'outline'
+  | 'success'
+  | 'warning'
+  | 'danger'
+  | 'premium';
 
-export function Badge({ className, variant, size, ...props }: BadgeProps) {
-  return <span className={cn(badgeVariants({ variant, size }), className)} {...props} />
+export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
+  variant?: BadgeVariant;
+  dot?: boolean;
 }
+
+const variantClasses: Record<BadgeVariant, string> = {
+  default: 'border-cyan-400/20 bg-cyan-400/10 text-cyan-100',
+  secondary: 'border-white/10 bg-white/8 text-white/80',
+  outline: 'border-white/15 bg-transparent text-white/75',
+  success: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-100',
+  warning: 'border-amber-400/20 bg-amber-400/10 text-amber-100',
+  danger: 'border-red-400/20 bg-red-500/10 text-red-100',
+  premium: 'border-fuchsia-400/20 bg-gradient-to-r from-amber-400/15 to-fuchsia-400/10 text-amber-50',
+};
+
+export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
+  ({ className, variant = 'default', dot = false, children, ...props }, ref) => {
+    return (
+      <span
+        ref={ref}
+        className={cn(
+          'inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold tracking-wide backdrop-blur-xl',
+          variantClasses[variant],
+          className,
+        )}
+        {...props}
+      >
+        {dot ? <span className="h-2 w-2 rounded-full bg-current opacity-80" /> : null}
+        {children}
+      </span>
+    );
+  },
+);
+
+Badge.displayName = 'Badge';
+
+export default Badge;
