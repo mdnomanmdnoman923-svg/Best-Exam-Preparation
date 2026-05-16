@@ -1,74 +1,168 @@
+// src/services/firestore.service.ts
+
 import {
-  db,
+  addDoc,
   collection,
+  deleteDoc,
   doc,
+  DocumentData,
   getDoc,
   getDocs,
+  limit,
+  onSnapshot,
+  orderBy,
+  query,
+  QueryConstraint,
+  serverTimestamp,
   setDoc,
   updateDoc,
-  deleteDoc,
-  addDoc,
-  query,
   where,
-  orderBy,
-  limit,
-  serverTimestamp,
-  type QueryConstraint,
-} from '@/firebase/firestore'
-import type { DocumentData } from 'firebase/firestore'
+} from 'firebase/firestore';
+import { db } from '@/firebase/config';
 
-export const firestoreService = {
-  async getDocument<T>(collectionName: string, id: string): Promise<T | null> {
-    const ref = doc(db, collectionName, id)
-    const snap = await getDoc(ref)
-    if (!snap.exists()) return null
-    return { id: snap.id, ...snap.data() } as T
-  },
-
-  async setDocument<T extends DocumentData>(
+export class FirestoreService {
+  static async create<T>(
     collectionName: string,
-    id: string,
     data: T,
-    merge = true
+    customId?: string,
   ) {
-    const ref = doc(db, collectionName, id)
-    await setDoc(ref, { ...data, updatedAt: serverTimestamp() }, { merge })
-  },
+    if (customId) {
+      const ref = doc(db, collectionName, customId);
 
-  async updateDocument<T extends Partial<DocumentData>>(
-    collectionName: string,
-    id: string,
-    data: T
-  ) {
-    const ref = doc(db, collectionName, id)
-    await updateDoc(ref, { ...data, updatedAt: serverTimestamp() })
-  },
+      await setDoc(ref, {
+        ...data,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
 
-  async addDocument<T extends DocumentData>(collectionName: string, data: T) {
-    const ref = collection(db, collectionName)
-    const docRef = await addDoc(ref, {
+      return customId;
+    }
+
+    const ref = await addDoc(collection(db, collectionName), {
       ...data,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
-    })
-    return docRef.id
-  },
+    });
 
-  async deleteDocument(collectionName: string, id: string) {
-    const ref = doc(db, collectionName, id)
-    await deleteDoc(ref)
-  },
+    return ref.id;
+  }
 
-  async queryDocuments<T>(
+  static async update<T>(
     collectionName: string,
-    constraints: QueryConstraint[]
-  ): Promise<T[]> {
-    const ref = collection(db, collectionName)
-    const q = query(ref, ...constraints)
-    const snap = await getDocs(q)
-    return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as T)
-  },
-}
+    id: string,
+    data: Partial<T>,
+  ) {
+    const ref = doc(db, collectionName, id);
 
-// Re-export query helpers for use in services
-export { where, orderBy, limit }
+    await updateDoc(ref, {
+      ...data,
+      updatedAt: serverTimestamp(),
+    });
+  }
+
+  static async remove(collectionName: string, id: string) {
+    const ref = doc(db, collectionName, id);
+    await deleteDoc(ref);
+  }
+
+  static async getById<T>(
+    collectionName: string,
+    id: string,
+  ): Promise<T | null> {
+    const ref = doc(db, collectionName, id);
+    const snapshot = await getDoc(ref);
+
+    if (!snapshot.exists()) return null;
+
+    return {
+      id: snapshot.id,
+      ...snapshot.data(),
+    } as T;
+  }
+
+  static async getAll<T>(
+    collectionName: string,
+    constraints: QueryConstraint[] = [],
+  ): Promise<T[]> {
+    const ref = collection(db, collectionName);
+    const q = query(ref, ...constraints);
+
+    const snapshot = await getDocs(q);
+
+    return snapshot.docs.map((docItem) => ({
+      id: docItem.id,
+      ...docItem.data(),
+    })) as T[];
+  }
+
+  static async getLatest<T>(
+    collectionName: string,
+    field = 'createdAt',
+    take = 10,
+  ): Promise<T[]> {
+    return this.getAll<T>(collectionName, [
+      orderBy(field, 'desc'),
+      limit(take),
+    ]);
+  }
+
+  static async where<T>(
+    collectionName: string,
+    field: string,
+    operator: any,
+    value: any,
+  ): Promise<T[]> {
+    return this.getAll<T>(collectionName, [
+      where(field, operator, value),
+    ]);
+  }
+
+  static subscribe<T>(
+    collectionName: string,
+    callback: (data: T[]) => void,
+    constraints: QueryConstraint[] = [],
+  ) {
+    const ref = collection(db, collectionName);
+    const q = query(ref, ...constraints);
+
+    return onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map((docItem) => ({
+        id: docItem.id,
+        ...docItem.data(),
+      })) as T[];
+
+      callback(data);
+    });
+  }
+
+  static subscribeDocument<T>(
+    collectionName: string,
+    id: string,
+    callback: (data: T | null) => void,
+  ) {
+    const ref = doc(db, collectionName, id);
+
+    return onSnapshot(ref, (snapshot) => {
+      if (!snapshot.exists()) {
+        callback(null);
+        return;
+      }
+
+      callback({
+        id: snapshot.id,
+        ...snapshot.data(),
+      } as T);
+    });
+  }
+
+  static async batchCreate(
+    collectionName: string,
+    items: DocumentData[],
+  ) {
+    await Promise.all(
+      items.map((item) =>
+        this.create(collectionName, item),
+      ),
+    );
+  }
+}
