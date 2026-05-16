@@ -1,27 +1,105 @@
-import { Navigate, Outlet } from 'react-router-dom'
-import { useAuthStore, selectIsAdmin } from '@/store/auth.store'
-import { ROUTES } from '@/lib/constants'
-import { LoadingScreen } from '@/components/common/LoadingScreen'
+// src/routes/AdminRoute.tsx
 
-/**
- * Requires admin or superadmin role.
- * Non-admins are redirected to dashboard.
- */
-export function AdminRoute() {
-  const { status } = useAuthStore()
-  const isAdmin = useAuthStore(selectIsAdmin)
+import React, { ReactNode, useMemo } from 'react';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import * as authStoreModule from '@/store/auth.store';
 
-  if (status === 'idle' || status === 'loading') {
-    return <LoadingScreen />
+type AuthUser = {
+  uid?: string;
+  id?: string;
+  role?: string;
+  isAdmin?: boolean;
+  permissions?: string[];
+  [key: string]: unknown;
+};
+
+type AuthStoreShape = {
+  user?: AuthUser | null;
+  currentUser?: AuthUser | null;
+  isAuthenticated?: boolean;
+  loading?: boolean;
+  isLoading?: boolean;
+};
+
+type AdminRouteProps = {
+  children?: ReactNode;
+  redirectTo?: string;
+  fallback?: ReactNode;
+};
+
+function useAuthStoreSafe(): AuthStoreShape {
+  const exported: unknown = (authStoreModule as Record<string, unknown>).default
+    ?? (authStoreModule as Record<string, unknown>).useAuthStore
+    ?? authStoreModule;
+
+  if (typeof exported === 'function') {
+    return (exported as () => AuthStoreShape)();
   }
 
-  if (status === 'unauthenticated') {
-    return <Navigate to={ROUTES.AUTH} replace />
+  return exported as AuthStoreShape;
+}
+
+function isLoggedIn(store: AuthStoreShape): boolean {
+  if (typeof store.isAuthenticated === 'boolean') return store.isAuthenticated;
+
+  const user = store.user ?? store.currentUser ?? null;
+  return Boolean(user && (user.uid || user.id));
+}
+
+function isAdminUser(store: AuthStoreShape): boolean {
+  const user = store.user ?? store.currentUser ?? null;
+  if (!user) return false;
+
+  if (user.isAdmin === true) return true;
+
+  const role = String(user.role ?? '').toLowerCase();
+  if (role === 'admin' || role === 'superadmin' || role === 'super-admin') {
+    return true;
   }
 
-  if (!isAdmin) {
-    return <Navigate to={ROUTES.DASHBOARD} replace />
+  return false;
+}
+
+export default function AdminRoute({
+  children,
+  redirectTo = '/login',
+  fallback,
+}: AdminRouteProps) {
+  const location = useLocation();
+  const auth = useAuthStoreSafe();
+
+  const loading = Boolean(auth.loading || auth.isLoading);
+  const allowed = useMemo(
+    () => isLoggedIn(auth) && isAdminUser(auth),
+    [auth],
+  );
+
+  if (loading) {
+    return fallback ? (
+      <>{fallback}</>
+    ) : (
+      <div className="flex min-h-screen items-center justify-center bg-[#070B14] text-white">
+        <div className="rounded-2xl border border-white/10 bg-white/5 px-6 py-4 backdrop-blur-xl">
+          <div className="text-sm font-medium tracking-wide text-white/80">
+            অ্যাডমিন যাচাই করা হচ্ছে...
+          </div>
+        </div>
+      </div>
+    );
   }
 
-  return <Outlet />
+  if (!allowed) {
+    return (
+      <Navigate
+        to={redirectTo}
+        replace
+        state={{
+          from: location.pathname + location.search,
+          reason: 'admin-only',
+        }}
+      />
+    );
+  }
+
+  return children ? <>{children}</> : <Outlet />;
 }
