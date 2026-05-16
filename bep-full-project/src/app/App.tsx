@@ -1,3 +1,10 @@
+import { Providers } from './providers'
+import { AppRouter } from './router'
+
 export default function App() {
-  return <div>BEP Platform</div>;
+  return (
+    <Providers>
+      <AppRouter />
+    </Providers>
+  )
 }
