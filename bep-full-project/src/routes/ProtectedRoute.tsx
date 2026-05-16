@@ -1,32 +1,84 @@
-import { Navigate, Outlet, useLocation } from 'react-router-dom'
-import { useAuthStore } from '@/store/auth.store'
-import { useProfileStore } from '@/store/profile.store'
-import { ROUTES } from '@/lib/constants'
-import { LoadingScreen } from '@/components/common/LoadingScreen'
+// src/routes/ProtectedRoute.tsx
 
-/**
- * Requires authentication.
- * If authenticated but profile incomplete → redirect to /complete-profile
- * (except when already on /complete-profile)
- */
-export function ProtectedRoute() {
-  const { status } = useAuthStore()
-  const { profile } = useProfileStore()
-  const location = useLocation()
+import React, { ReactNode, useMemo } from 'react';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import * as authStoreModule from '@/store/auth.store';
 
-  if (status === 'idle' || status === 'loading') {
-    return <LoadingScreen />
+type AuthUser = {
+  uid?: string;
+  id?: string;
+  role?: string;
+  isAdmin?: boolean;
+  premium?: boolean;
+  premiumExpiresAt?: string | number | Date | null;
+  [key: string]: unknown;
+};
+
+type AuthStoreShape = {
+  user?: AuthUser | null;
+  currentUser?: AuthUser | null;
+  isAuthenticated?: boolean;
+  loading?: boolean;
+  isLoading?: boolean;
+  initialized?: boolean;
+  ready?: boolean;
+};
+
+type ProtectedRouteProps = {
+  children?: ReactNode;
+  redirectTo?: string;
+};
+
+function useAuthStoreSafe(): AuthStoreShape {
+  const exported: unknown = (authStoreModule as Record<string, unknown>).default
+    ?? (authStoreModule as Record<string, unknown>).useAuthStore
+    ?? authStoreModule;
+
+  if (typeof exported === 'function') {
+    return (exported as () => AuthStoreShape)();
   }
 
-  if (status === 'unauthenticated') {
-    return <Navigate to={ROUTES.AUTH} state={{ from: location }} replace />
+  return exported as AuthStoreShape;
+}
+
+function isLoggedIn(store: AuthStoreShape): boolean {
+  if (typeof store.isAuthenticated === 'boolean') return store.isAuthenticated;
+
+  const user = store.user ?? store.currentUser ?? null;
+  return Boolean(user && (user.uid || user.id));
+}
+
+export default function ProtectedRoute({
+  children,
+  redirectTo = '/login',
+}: ProtectedRouteProps) {
+  const location = useLocation();
+  const auth = useAuthStoreSafe();
+
+  const loading = Boolean(auth.loading || auth.isLoading);
+  const allowed = useMemo(() => isLoggedIn(auth), [auth]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#070B14] text-white">
+        <div className="rounded-2xl border border-white/10 bg-white/5 px-6 py-4 backdrop-blur-xl">
+          <div className="text-sm font-medium tracking-wide text-white/80">
+            লোড হচ্ছে...
+          </div>
+        </div>
+      </div>
+    );
   }
 
-  const isOnCompleteProfile = location.pathname === ROUTES.COMPLETE_PROFILE
-
-  if (!profile?.isProfileComplete && !isOnCompleteProfile) {
-    return <Navigate to={ROUTES.COMPLETE_PROFILE} replace />
+  if (!allowed) {
+    return (
+      <Navigate
+        to={redirectTo}
+        replace
+        state={{ from: location.pathname + location.search }}
+      />
+    );
   }
 
-  return <Outlet />
+  return children ? <>{children}</> : <Outlet />;
 }
