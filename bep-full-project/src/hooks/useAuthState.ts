@@ -1,72 +1,82 @@
-import { useEffect } from 'react'
-import { auth, onAuthStateChanged } from '@/firebase/auth'
-import { useAuthStore } from '@/store/auth.store'
-import { useProfileStore } from '@/store/profile.store'
-import { profileService } from '@/features/profile/services/profile.service'
-import { authService } from '@/services/auth.service'
+// bep-full-project/src/hooks/useAuthState.ts
 
-/**
- * Bootstraps Firebase auth state into Zustand.
- * Called once at app root via AuthStateListener component.
- */
-export function useAuthState() {
-  const { setUser, setRole, setStatus } = useAuthStore()
-  const { setProfile, setEducation, reset: resetProfile } = useProfileStore()
+import { useCallback, useEffect, useMemo, useState } from 'react';
+
+import type { AuthUserProfile } from '@/firebase/auth';
+import { getCurrentUser, onUserChanged } from '@/firebase/auth';
+
+export interface UseAuthStateOptions {
+  initialUser?: AuthUserProfile | null;
+  listen?: boolean;
+}
+
+export interface UseAuthStateReturn {
+  user: AuthUserProfile | null;
+  loading: boolean;
+  initialized: boolean;
+  isAuthenticated: boolean;
+  isAnonymous: boolean;
+  emailVerified: boolean;
+  providerId: string | null;
+  refresh: () => void;
+  setUser: (user: AuthUserProfile | null) => void;
+}
+
+export default function useAuthState(
+  options: UseAuthStateOptions = {},
+): UseAuthStateReturn {
+  const {
+    initialUser = getCurrentUser(),
+    listen = true,
+  } = options;
+
+  const [user, setUser] = useState<AuthUserProfile | null>(initialUser);
+  const [loading, setLoading] = useState<boolean>(!initialUser);
+  const [initialized, setInitialized] = useState<boolean>(Boolean(initialUser));
+
+  const applyCurrentUser = useCallback(() => {
+    const currentUser = getCurrentUser();
+    setUser(currentUser);
+    setLoading(false);
+    setInitialized(true);
+  }, []);
 
   useEffect(() => {
-    setStatus('loading')
+    if (!listen) {
+      applyCurrentUser();
+      return;
+    }
 
-    const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (!firebaseUser) {
-        setUser(null)
-        setRole(null)
-        setStatus('unauthenticated')
-        resetProfile()
-        return
-      }
+    setLoading(true);
 
-      // Hydrate auth user
-      setUser({
-        uid: firebaseUser.uid,
-        email: firebaseUser.email,
-        displayName: firebaseUser.displayName,
-        photoURL: firebaseUser.photoURL,
-        emailVerified: firebaseUser.emailVerified,
-        phoneNumber: firebaseUser.phoneNumber,
-      })
+    const subscription = onUserChanged((nextUser) => {
+      setUser(nextUser);
+      setLoading(false);
+      setInitialized(true);
+    });
 
-      // Load Firestore profile, education, role in parallel
-      try {
-        const [profile, education, role] = await Promise.all([
-          profileService.getProfile(firebaseUser.uid),
-          profileService.getEducation(firebaseUser.uid),
-          profileService.getRole(firebaseUser.uid),
-        ])
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [applyCurrentUser, listen]);
 
-        if (!profile) {
-          // First-time user — create a minimal profile
-          await profileService.createProfile(firebaseUser.uid, {
-            uid: firebaseUser.uid,
-            displayName: firebaseUser.displayName ?? '',
-            email: firebaseUser.email,
-            photoURL: firebaseUser.photoURL,
-            phoneNumber: firebaseUser.phoneNumber,
-          })
-          const fresh = await profileService.getProfile(firebaseUser.uid)
-          setProfile(fresh)
-        } else {
-          setProfile(profile)
-        }
+  const refresh = useCallback(() => {
+    applyCurrentUser();
+  }, [applyCurrentUser]);
 
-        setEducation(education)
-        setRole(role)
-        setStatus('authenticated')
-      } catch (err) {
-        console.error('[AuthState] profile load failed:', err)
-        setStatus('authenticated') // still authenticated, just no profile yet
-      }
-    })
+  const value = useMemo<UseAuthStateReturn>(() => {
+    return {
+      user,
+      loading,
+      initialized,
+      isAuthenticated: Boolean(user),
+      isAnonymous: Boolean(user?.isAnonymous),
+      emailVerified: Boolean(user?.emailVerified),
+      providerId: user?.providerId ?? null,
+      refresh,
+      setUser,
+    };
+  }, [initialized, loading, refresh, user]);
 
-    return unsub
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  return value;
 }
