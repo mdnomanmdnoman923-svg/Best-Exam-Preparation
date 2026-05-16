@@ -1,49 +1,81 @@
-import { motion } from 'framer-motion'
+// src/components/common/LoadingScreen.tsx
 
-export function LoadingScreen() {
+import React from 'react';
+import { motion } from 'framer-motion';
+import AnimatedBackground from './AnimatedBackground';
+
+type LoadingScreenProps = {
+  title?: string;
+  subtitle?: string;
+  showProgress?: boolean;
+  progress?: number;
+};
+
+export default function LoadingScreen({
+  title = 'লোড হচ্ছে...',
+  subtitle = 'আপনার শেখার যাত্রা প্রস্তুত করা হচ্ছে',
+  showProgress = false,
+  progress = 0,
+}: LoadingScreenProps) {
+  const safeProgress = Math.max(0, Math.min(100, progress));
+
   return (
-    <div className="fixed inset-0 bg-bep-bg flex flex-col items-center justify-center z-50">
-      {/* Ambient orbs */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-bep-primary/10 rounded-full blur-3xl animate-orb" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-bep-accent/8 rounded-full blur-3xl animate-orb delay-300" />
-      </div>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#050816] text-white">
+      <AnimatedBackground intensity="high" />
 
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-        className="relative flex flex-col items-center gap-6"
-      >
-        {/* Logo mark */}
-        <div className="relative">
-          <div className="w-20 h-20 rounded-2xl bg-primary-gradient flex items-center justify-center shadow-glow-md animate-pulse-glow">
-            <span className="text-3xl font-bold text-white font-display">BEP</span>
-          </div>
-          <div className="absolute -inset-1 rounded-2xl bg-primary-gradient opacity-30 blur-md -z-10" />
-        </div>
-
-        {/* Spinner */}
-        <div className="flex gap-1.5">
-          {[0, 1, 2].map((i) => (
+      <div className="relative z-10 mx-auto flex w-full max-w-md flex-col items-center px-6 py-10">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.92, y: 12 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+          className="w-full rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/30 backdrop-blur-2xl"
+        >
+          <div className="flex flex-col items-center text-center">
             <motion.div
-              key={i}
-              className="w-2 h-2 rounded-full bg-bep-primary"
-              animate={{ y: [0, -8, 0] }}
-              transition={{
-                duration: 0.8,
-                repeat: Infinity,
-                delay: i * 0.15,
-                ease: 'easeInOut',
-              }}
-            />
-          ))}
-        </div>
+              aria-hidden="true"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1.2, repeat: Infinity, ease: 'linear' }}
+              className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-400/10"
+            >
+              <div className="h-6 w-6 rounded-full border-2 border-cyan-300 border-t-transparent" />
+            </motion.div>
 
-        <p className="text-bep-text-dim text-sm font-bengali">
-          লোড হচ্ছে...
+            <h1 className="text-xl font-semibold tracking-wide text-white">
+              {title}
+            </h1>
+            <p className="mt-2 text-sm leading-6 text-white/70">
+              {subtitle}
+            </p>
+
+            {showProgress ? (
+              <div className="mt-6 w-full">
+                <div className="mb-2 flex items-center justify-between text-xs text-white/55">
+                  <span>প্রসেসিং</span>
+                  <span>{safeProgress}%</span>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-white/10">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${safeProgress}%` }}
+                    transition={{ duration: 0.4, ease: 'easeOut' }}
+                    className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-sky-400 to-indigo-400"
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="mt-6 flex items-center gap-2">
+                <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-cyan-300" />
+                <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-sky-300 [animation-delay:150ms]" />
+                <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-indigo-300 [animation-delay:300ms]" />
+              </div>
+            )}
+          </div>
+        </motion.div>
+
+        <p className="mt-5 text-xs text-white/40">
+          BEP • Bengali-first EdTech experience
         </p>
-      </motion.div>
+      </div>
     </div>
-  )
+  );
 }
