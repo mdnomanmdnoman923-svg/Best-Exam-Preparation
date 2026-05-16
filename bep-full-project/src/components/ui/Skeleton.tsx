@@ -1,30 +1,37 @@
-import { cn } from '@/lib/cn'
+// src/components/ui/Skeleton.tsx
 
-interface SkeletonProps {
-  className?: string
-  lines?: number
+import React from 'react';
+import { cn } from '@/lib/cn';
+
+export interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
+  rounded?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
 }
 
-export function Skeleton({ className }: { className?: string }) {
-  return <div className={cn('skeleton', className)} />
-}
+const roundedMap = {
+  sm: 'rounded-md',
+  md: 'rounded-xl',
+  lg: 'rounded-2xl',
+  xl: 'rounded-3xl',
+  full: 'rounded-full',
+};
 
-export function SkeletonCard({ className }: SkeletonProps) {
-  return (
-    <div className={cn('glass-card p-5 space-y-3', className)}>
-      <Skeleton className="h-4 w-3/4" />
-      <Skeleton className="h-3 w-1/2" />
-      <Skeleton className="h-3 w-2/3" />
-    </div>
-  )
-}
+export const Skeleton = React.forwardRef<HTMLDivElement, SkeletonProps>(
+  ({ className, rounded = 'md', ...props }, ref) => {
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          'relative overflow-hidden bg-white/8',
+          'before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_1.8s_infinite] before:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent)]',
+          roundedMap[rounded],
+          className,
+        )}
+        {...props}
+      />
+    );
+  },
+);
 
-export function SkeletonGrid({ count = 6 }: { count?: number }) {
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {Array.from({ length: count }).map((_, i) => (
-        <SkeletonCard key={i} />
-      ))}
-    </div>
-  )
-}
+Skeleton.displayName = 'Skeleton';
+
+export default Skeleton;
