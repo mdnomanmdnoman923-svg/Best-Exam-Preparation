@@ -44,6 +44,7 @@ const config: Config = {
         'fade-in': 'fadeIn 0.3s ease-out',
         'shimmer': 'shimmer 2s linear infinite',
         'spin-slow': 'spin 8s linear infinite',
+        'orb': 'orb 12s ease-in-out infinite',
       },
       keyframes: {
         float: {
@@ -65,6 +66,12 @@ const config: Config = {
         shimmer: {
           '0%': { backgroundPosition: '-200% 0' },
           '100%': { backgroundPosition: '200% 0' },
+        },
+        orb: {
+          '0%': { transform: 'translate(0, 0) scale(1)' },
+          '33%': { transform: 'translate(30px, -30px) scale(1.05)' },
+          '66%': { transform: 'translate(-20px, 20px) scale(0.95)' },
+          '100%': { transform: 'translate(0, 0) scale(1)' },
         },
       },
       backdropBlur: {
