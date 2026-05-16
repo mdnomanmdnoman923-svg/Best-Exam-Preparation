@@ -1,58 +1,102 @@
-import { forwardRef } from 'react'
-import { cva, type VariantProps } from 'class-variance-authority'
-import { cn } from '@/lib/cn'
+// src/components/ui/Button.tsx
 
-const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 font-semibold rounded-xl transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bep-primary/60 select-none font-bengali',
-  {
-    variants: {
-      variant: {
-        primary:  'bg-primary-gradient text-white shadow-glow-sm hover:shadow-glow-md',
-        secondary:'bg-bep-surface border border-bep-border text-bep-text hover:bg-bep-card hover:border-bep-primary/40',
-        ghost:    'text-bep-text-dim hover:text-bep-text hover:bg-bep-surface',
-        danger:   'bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20',
-        gold:     'bg-gold-gradient text-bep-bg shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:shadow-[0_0_30px_rgba(245,158,11,0.5)]',
-        outline:  'border border-bep-primary/50 text-bep-primary hover:bg-bep-primary/10',
-      },
-      size: {
-        sm:   'text-xs px-3 py-2',
-        md:   'text-sm px-5 py-2.5',
-        lg:   'text-base px-7 py-3.5',
-        icon: 'p-2.5',
-      },
-    },
-    defaultVariants: {
-      variant: 'primary',
-      size: 'md',
-    },
-  }
-)
+import React from 'react';
+import { Loader2 } from 'lucide-react';
+import { cn } from '@/lib/cn';
 
-interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
-  isLoading?: boolean
-  leftIcon?: React.ReactNode
-  rightIcon?: React.ReactNode
+export type ButtonVariant =
+  | 'primary'
+  | 'secondary'
+  | 'outline'
+  | 'ghost'
+  | 'destructive'
+  | 'premium';
+
+export type ButtonSize = 'sm' | 'md' | 'lg' | 'icon';
+
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  loading?: boolean;
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
+  fullWidth?: boolean;
 }
 
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, isLoading, leftIcon, rightIcon, children, disabled, ...props }, ref) => {
+const variantClasses: Record<ButtonVariant, string> = {
+  primary:
+    'border border-cyan-400/20 bg-gradient-to-r from-cyan-500 to-sky-500 text-white shadow-lg shadow-cyan-500/20 hover:from-cyan-400 hover:to-sky-400',
+  secondary:
+    'border border-white/10 bg-white/8 text-white hover:bg-white/12',
+  outline:
+    'border border-white/15 bg-transparent text-white hover:bg-white/8 hover:border-white/25',
+  ghost:
+    'border border-transparent bg-transparent text-white/80 hover:bg-white/8 hover:text-white',
+  destructive:
+    'border border-red-400/20 bg-red-500/10 text-red-100 hover:bg-red-500/15 hover:text-white',
+  premium:
+    'border border-amber-400/20 bg-gradient-to-r from-amber-400/15 via-yellow-300/10 to-fuchsia-400/10 text-amber-50 shadow-lg shadow-amber-500/10 hover:from-amber-400/20 hover:to-fuchsia-400/15',
+};
+
+const sizeClasses: Record<ButtonSize, string> = {
+  sm: 'h-9 rounded-xl px-3 text-sm',
+  md: 'h-11 rounded-2xl px-4 text-sm',
+  lg: 'h-12 rounded-2xl px-5 text-base',
+  icon: 'h-11 w-11 rounded-2xl p-0',
+};
+
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  (
+    {
+      className,
+      variant = 'primary',
+      size = 'md',
+      loading = false,
+      disabled,
+      leftIcon,
+      rightIcon,
+      fullWidth = false,
+      children,
+      type = 'button',
+      ...props
+    },
+    ref,
+  ) => {
+    const isDisabled = disabled || loading;
+
     return (
       <button
         ref={ref}
-        className={cn(buttonVariants({ variant, size }), className)}
-        disabled={disabled || isLoading}
+        type={type}
+        disabled={isDisabled}
+        className={cn(
+          'inline-flex items-center justify-center gap-2 font-semibold tracking-wide',
+          'transition-all duration-200 ease-out',
+          'focus:outline-none focus:ring-2 focus:ring-cyan-400/40 focus:ring-offset-0',
+          'disabled:cursor-not-allowed disabled:opacity-60',
+          'backdrop-blur-xl',
+          variantClasses[variant],
+          sizeClasses[size],
+          fullWidth && 'w-full',
+          className,
+        )}
         {...props}
       >
-        {isLoading ? (
-          <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-        ) : leftIcon}
-        {children}
-        {!isLoading && rightIcon}
-      </button>
-    )
-  }
-)
+        {loading ? (
+          <Loader2 className={cn('h-4 w-4 animate-spin', size === 'icon' && 'h-4 w-4')} />
+        ) : leftIcon ? (
+          <span className="shrink-0">{leftIcon}</span>
+        ) : null}
 
-Button.displayName = 'Button'
+        {size !== 'icon' ? <span>{children}</span> : null}
+
+        {!loading && rightIcon ? <span className="shrink-0">{rightIcon}</span> : null}
+      </button>
+    );
+  },
+);
+
+Button.displayName = 'Button';
+
+export default Button;
