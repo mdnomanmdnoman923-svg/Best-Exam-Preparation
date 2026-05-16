@@ -1,25 +1,108 @@
-/**
- * Firestore collection names — single source of truth.
- * Never hard-code collection strings in services.
- */
-export const COLLECTIONS = {
-  PROFILES: 'profiles',
-  EDUCATION_PROFILES: 'educationProfiles',
-  PROFILE_BATCHES: 'profileBatches',
-  USER_ROLES: 'userRoles',
-  SUBJECTS: 'subjects',
-  CHAPTERS: 'chapters',
-  QUESTIONS: 'questions',
-  ATTEMPTS: 'attempts',
-  BOOKMARKS: 'bookmarks',
-  MOCK_TESTS: 'mockTests',
-  COMMUNITY_POSTS: 'communityPosts',
-  REPLIES: 'replies',
-  ANNOUNCEMENTS: 'announcements',
-  CHAT_HISTORY: 'chatHistory',
-  NOTIFICATIONS: 'notifications',
-  SITE_CONTENT: 'siteContent',
-  SITE_SETTINGS: 'siteSettings',
-} as const
+// bep-full-project/src/firebase/collections.ts
 
-export type CollectionName = typeof COLLECTIONS[keyof typeof COLLECTIONS]
+export const collectionNames = {
+  users: 'users',
+
+  profiles: 'profiles',
+
+  subjects: 'subjects',
+
+  chapters: 'chapters',
+
+  questions: 'questions',
+
+  questionAttempts:
+    'questionAttempts',
+
+  practiceSessions:
+    'practiceSessions',
+
+  exams: 'exams',
+
+  examAttempts:
+    'examAttempts',
+
+  bookmarks: 'bookmarks',
+
+  weakTopics:
+    'weakTopics',
+
+  progress: 'progress',
+
+  leaderboard:
+    'leaderboard',
+
+  notifications:
+    'notifications',
+
+  aiChats: 'aiChats',
+
+  aiMessages:
+    'aiMessages',
+
+  communityPosts:
+    'communityPosts',
+
+  communityReplies:
+    'communityReplies',
+
+  reports: 'reports',
+
+  analytics:
+    'analytics',
+
+  settings: 'settings',
+
+  subscriptions:
+    'subscriptions',
+
+  payments: 'payments',
+
+  coupons: 'coupons',
+
+  batches: 'batches',
+
+  classes: 'classes',
+
+  studyPlans:
+    'studyPlans',
+
+  studyStreaks:
+    'studyStreaks',
+
+  achievements:
+    'achievements',
+
+  badges: 'badges',
+
+  activityLogs:
+    'activityLogs',
+
+  supportTickets:
+    'supportTickets',
+
+  adminLogs:
+    'adminLogs',
+
+  appConfigs:
+    'appConfigs',
+
+  featureFlags:
+    'featureFlags',
+
+  uploads: 'uploads',
+} as const;
+
+export type CollectionName =
+  keyof typeof collectionNames;
+
+export type CollectionValue =
+  (typeof collectionNames)[CollectionName];
+
+export function getCollectionName(
+  key: CollectionName,
+): CollectionValue {
+  return collectionNames[key];
+}
+
+export default collectionNames;
