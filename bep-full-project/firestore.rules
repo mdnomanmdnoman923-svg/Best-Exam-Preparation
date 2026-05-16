@@ -1,1 +1,105 @@
-// firestore.rules
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ────────────────────────────────────────────
+    function isAuth() { return request.auth != null; }
+    function isOwner(uid) { return request.auth.uid == uid; }
+    function isAdmin() {
+      return isAuth() && get(/databases/$(database)/documents/userRoles/$(request.auth.uid)).data.role in ['admin','superadmin'];
+    }
+
+    // ── Profiles ───────────────────────────────────────────
+    match /profiles/{uid} {
+      allow read: if isAuth();
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /educationProfiles/{uid} {
+      allow read: if isAuth();
+      allow write: if isOwner(uid) || isAdmin();
+    }
+
+    match /userRoles/{uid} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
+    // ── Subjects & Chapters ────────────────────────────────
+    match /subjects/{id} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
+    match /chapters/{id} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
+    // ── Questions ──────────────────────────────────────────
+    match /questions/{id} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
+    // ── Attempts & Bookmarks ───────────────────────────────
+    match /attempts/{id} {
+      allow read: if isAuth() && resource.data.uid == request.auth.uid;
+      allow create: if isAuth() && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    match /bookmarks/{id} {
+      allow read, write: if isAuth() && (resource == null || resource.data.uid == request.auth.uid);
+    }
+
+    // ── Mock Tests ─────────────────────────────────────────
+    match /mockTests/{id} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
+    // ── Community ──────────────────────────────────────────
+    match /communityPosts/{id} {
+      allow read: if isAuth();
+      allow create: if isAuth() && request.resource.data.uid == request.auth.uid;
+      allow update: if isAuth() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    match /communityPosts/{postId}/replies/{replyId} {
+      allow read: if isAuth();
+      allow create: if isAuth();
+      allow update, delete: if isAuth() && (resource.data.uid == request.auth.uid || isAdmin());
+    }
+
+    // ── Notifications ──────────────────────────────────────
+    match /notifications/{id} {
+      allow read, update: if isAuth() && resource.data.uid == request.auth.uid;
+      allow create: if isAdmin();
+      allow delete: if false;
+    }
+
+    // ── Admin CMS ──────────────────────────────────────────
+    match /siteContent/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /siteSettings/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /announcements/{id} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
+    match /chatHistory/{id} {
+      allow read, write: if isAuth() && resource.data.uid == request.auth.uid;
+    }
+  }
+}
