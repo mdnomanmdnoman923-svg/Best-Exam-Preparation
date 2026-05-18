@@ -1,630 +1,448 @@
-// src/routes/routeConfig.tsx
+// bep-full-project/src/routes/routeConfig.tsx
 
-import React, { lazy, Suspense } from 'react';
+import React, { lazy } from 'react';
 import {
-  Navigate,
-  RouteObject,
-} from 'react-router-dom';
+  BookOpen,
+  Brain,
+  Crown,
+  Gauge,
+  GraduationCap,
+  History,
+  LayoutDashboard,
+  Layers3,
+  LineChart,
+  Lock,
+  MessageCircle,
+  Settings,
+  ShieldCheck,
+  Sparkles,
+  Target,
+  Trophy,
+  Users,
+  Wand2,
+} from 'lucide-react';
 
-import ProtectedRoute from './ProtectedRoute';
-import AdminRoute from './AdminRoute';
+/* -------------------------------------------------------------------------- */
+/*                                   Routes                                   */
+/* -------------------------------------------------------------------------- */
 
-import LoadingScreen from '@/components/common/LoadingScreen';
-
-const HomePage = lazy(
-  () => import('@/pages/public/HomePage'),
-);
-
-const AboutPage = lazy(
-  () => import('@/pages/public/AboutPage'),
-);
-
-const ContactPage = lazy(
-  () => import('@/pages/public/ContactPage'),
-);
-
+/**
+ * Public Pages
+ */
+const HomePage = lazy(() => import('@/pages/public/HomePage'));
+const AuthPage = lazy(() => import('@/pages/public/AuthPage'));
+const PricingPage = lazy(() => import('@/pages/public/PricingPage'));
+const AboutPage = lazy(() => import('@/pages/public/AboutPage'));
 const PrivacyPolicyPage = lazy(
   () => import('@/pages/public/PrivacyPolicyPage'),
 );
+const TermsPage = lazy(() => import('@/pages/public/TermsPage'));
 
-const TermsPage = lazy(
-  () => import('@/pages/public/TermsPage'),
-);
-
-const LoginPage = lazy(
-  () => import('@/pages/auth/LoginPage'),
-);
-
-const RegisterPage = lazy(
-  () => import('@/pages/auth/RegisterPage'),
-);
-
-const ForgotPasswordPage = lazy(
-  () =>
-    import(
-      '@/pages/auth/ForgotPasswordPage'
-    ),
-);
-
+/**
+ * Protected Pages
+ */
 const DashboardPage = lazy(
-  () =>
-    import(
-      '@/pages/dashboard/DashboardPage'
-    ),
+  () => import('@/pages/protected/DashboardPage'),
 );
 
-const SubjectsPage = lazy(
-  () =>
-    import(
-      '@/pages/dashboard/SubjectsPage'
-    ),
-);
-
-const SubjectDetailsPage = lazy(
-  () =>
-    import(
-      '@/pages/dashboard/SubjectDetailsPage'
-    ),
-);
-
-const ChapterDetailsPage = lazy(
-  () =>
-    import(
-      '@/pages/dashboard/ChapterDetailsPage'
-    ),
+const QuestionBankPage = lazy(
+  () => import('@/pages/protected/QuestionBankPage'),
 );
 
 const PracticePage = lazy(
-  () =>
-    import(
-      '@/pages/practice/PracticePage'
-    ),
+  () => import('@/pages/protected/PracticePage'),
 );
 
-const MockExamPage = lazy(
-  () =>
-    import(
-      '@/pages/exams/MockExamPage'
-    ),
+const MockTestsPage = lazy(
+  () => import('@/pages/protected/MockTestsPage'),
 );
 
-const AnalyticsPage = lazy(
-  () =>
-    import(
-      '@/pages/dashboard/AnalyticsPage'
-    ),
+const ProgressPage = lazy(
+  () => import('@/pages/protected/ProgressPage'),
 );
 
-const CommunityPage = lazy(
-  () =>
-    import(
-      '@/pages/community/CommunityPage'
-    ),
-);
-
-const CommunityPostPage = lazy(
-  () =>
-    import(
-      '@/pages/community/CommunityPostPage'
-    ),
+const HistoryPage = lazy(
+  () => import('@/pages/protected/HistoryPage'),
 );
 
 const LeaderboardPage = lazy(
-  () =>
-    import(
-      '@/pages/leaderboard/LeaderboardPage'
-    ),
+  () => import('@/pages/protected/LeaderboardPage'),
 );
 
-const ProfilePage = lazy(
-  () =>
-    import(
-      '@/pages/profile/ProfilePage'
-    ),
+const CommunityPage = lazy(
+  () => import('@/pages/protected/CommunityPage'),
+);
+
+const AiAssistantPage = lazy(
+  () => import('@/pages/protected/AiAssistantPage'),
 );
 
 const SettingsPage = lazy(
-  () =>
-    import(
-      '@/pages/settings/SettingsPage'
-    ),
+  () => import('@/pages/protected/SettingsPage'),
 );
 
-const PremiumPage = lazy(
-  () =>
-    import(
-      '@/pages/premium/PremiumPage'
-    ),
+const ProfileUpdatePage = lazy(
+  () => import('@/pages/protected/ProfileUpdatePage'),
 );
 
+const CompleteProfilePage = lazy(
+  () => import('@/pages/protected/CompleteProfilePage'),
+);
+
+const ChangePasswordPage = lazy(
+  () => import('@/pages/protected/ChangePasswordPage'),
+);
+
+const ExamPage = lazy(
+  () => import('@/pages/protected/ExamPage'),
+);
+
+/**
+ * Admin Pages
+ */
 const AdminDashboardPage = lazy(
-  () =>
-    import(
-      '@/pages/admin/AdminDashboardPage'
-    ),
+  () => import('@/pages/admin/AdminDashboardPage'),
 );
 
-const AdminSubjectsPage = lazy(
-  () =>
-    import(
-      '@/pages/admin/AdminSubjectsPage'
-    ),
+const AdminProfilesPage = lazy(
+  () => import('@/pages/admin/AdminProfilesPage'),
 );
 
 const AdminQuestionsPage = lazy(
-  () =>
-    import(
-      '@/pages/admin/AdminQuestionsPage'
-    ),
+  () => import('@/pages/admin/AdminQuestionsPage'),
 );
 
-const AdminUsersPage = lazy(
-  () =>
-    import(
-      '@/pages/admin/AdminUsersPage'
-    ),
+const AdminSubjectsPage = lazy(
+  () => import('@/pages/admin/AdminSubjectsPage'),
 );
 
-const AdminCMSPage = lazy(
-  () =>
-    import('@/pages/admin/AdminCMSPage'),
+const AdminChaptersPage = lazy(
+  () => import('@/pages/admin/AdminChaptersPage'),
 );
 
-const NotFoundPage = lazy(
-  () =>
-    import('@/pages/system/NotFoundPage'),
+const AdminContentPage = lazy(
+  () => import('@/pages/admin/AdminContentPage'),
 );
 
-function PageLoader({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <Suspense
-      fallback={<LoadingScreen />}
-    >
-      {children}
-    </Suspense>
-  );
-}
+const AdminSettingsPage = lazy(
+  () => import('@/pages/admin/AdminSettingsPage'),
+);
 
-export interface AppRouteMeta {
+/* -------------------------------------------------------------------------- */
+/*                                    Types                                   */
+/* -------------------------------------------------------------------------- */
+
+export interface AppRoute {
+  path: string;
   title: string;
-  requiresAuth?: boolean;
-  requiresAdmin?: boolean;
+  description?: string;
+  icon?: React.ReactNode;
+  element: React.LazyExoticComponent<() => JSX.Element>;
+  protected?: boolean;
+  admin?: boolean;
   showInSidebar?: boolean;
   showInNavbar?: boolean;
-  premium?: boolean;
+  badge?: string;
 }
 
-export interface AppRouteConfig
-  extends RouteObject {
-  meta?: AppRouteMeta;
+/* -------------------------------------------------------------------------- */
+/*                               Public Routes                                */
+/* -------------------------------------------------------------------------- */
+
+export const publicRoutes: AppRoute[] = [
+  {
+    path: '/',
+    title: 'Home',
+    description: 'Landing page for the BEP learning platform.',
+    icon: <Sparkles className="h-4 w-4" />,
+    element: HomePage,
+    showInNavbar: true,
+  },
+  {
+    path: '/auth',
+    title: 'Authentication',
+    description: 'Login and register page.',
+    icon: <Lock className="h-4 w-4" />,
+    element: AuthPage,
+  },
+  {
+    path: '/pricing',
+    title: 'Pricing',
+    description: 'Subscription and premium plans.',
+    icon: <Crown className="h-4 w-4" />,
+    element: PricingPage,
+    showInNavbar: true,
+  },
+  {
+    path: '/about',
+    title: 'About',
+    description: 'Learn more about the BEP platform.',
+    icon: <Users className="h-4 w-4" />,
+    element: AboutPage,
+    showInNavbar: true,
+  },
+  {
+    path: '/privacy-policy',
+    title: 'Privacy Policy',
+    description: 'Privacy and user data information.',
+    icon: <ShieldCheck className="h-4 w-4" />,
+    element: PrivacyPolicyPage,
+  },
+  {
+    path: '/terms',
+    title: 'Terms of Service',
+    description: 'Terms, rules, and conditions.',
+    icon: <BookOpen className="h-4 w-4" />,
+    element: TermsPage,
+  },
+];
+
+/* -------------------------------------------------------------------------- */
+/*                              Protected Routes                              */
+/* -------------------------------------------------------------------------- */
+
+export const protectedRoutes: AppRoute[] = [
+  {
+    path: '/dashboard',
+    title: 'Dashboard',
+    description: 'Overview of progress and activity.',
+    icon: <LayoutDashboard className="h-4 w-4" />,
+    element: DashboardPage,
+    protected: true,
+    showInSidebar: true,
+  },
+  {
+    path: '/question-bank',
+    title: 'Question Bank',
+    description: 'Browse and practice questions.',
+    icon: <BookOpen className="h-4 w-4" />,
+    element: QuestionBankPage,
+    protected: true,
+    showInSidebar: true,
+  },
+  {
+    path: '/practice',
+    title: 'Practice',
+    description: 'Topic-based practice sessions.',
+    icon: <Target className="h-4 w-4" />,
+    element: PracticePage,
+    protected: true,
+    showInSidebar: true,
+  },
+  {
+    path: '/mock-tests',
+    title: 'Mock Tests',
+    description: 'Timed mock examinations.',
+    icon: <GraduationCap className="h-4 w-4" />,
+    element: MockTestsPage,
+    protected: true,
+    showInSidebar: true,
+    badge: 'Popular',
+  },
+  {
+    path: '/progress',
+    title: 'Progress',
+    description: 'Track learning analytics.',
+    icon: <LineChart className="h-4 w-4" />,
+    element: ProgressPage,
+    protected: true,
+    showInSidebar: true,
+  },
+  {
+    path: '/history',
+    title: 'History',
+    description: 'Review past attempts and activity.',
+    icon: <History className="h-4 w-4" />,
+    element: HistoryPage,
+    protected: true,
+    showInSidebar: true,
+  },
+  {
+    path: '/leaderboard',
+    title: 'Leaderboard',
+    description: 'Compare ranks and achievements.',
+    icon: <Trophy className="h-4 w-4" />,
+    element: LeaderboardPage,
+    protected: true,
+    showInSidebar: true,
+  },
+  {
+    path: '/community',
+    title: 'Community',
+    description: 'Discuss and interact with learners.',
+    icon: <MessageCircle className="h-4 w-4" />,
+    element: CommunityPage,
+    protected: true,
+    showInSidebar: true,
+  },
+  {
+    path: '/ai-assistant',
+    title: 'AI Assistant',
+    description: 'AI-powered study support.',
+    icon: <Brain className="h-4 w-4" />,
+    element: AiAssistantPage,
+    protected: true,
+    showInSidebar: true,
+    badge: 'AI',
+  },
+  {
+    path: '/exam/:examId',
+    title: 'Exam',
+    description: 'Take a live exam or mock test.',
+    icon: <GraduationCap className="h-4 w-4" />,
+    element: ExamPage,
+    protected: true,
+  },
+  {
+    path: '/settings',
+    title: 'Settings',
+    description: 'Manage account preferences.',
+    icon: <Settings className="h-4 w-4" />,
+    element: SettingsPage,
+    protected: true,
+    showInSidebar: true,
+  },
+  {
+    path: '/profile/update',
+    title: 'Update Profile',
+    description: 'Edit account and profile information.',
+    icon: <Users className="h-4 w-4" />,
+    element: ProfileUpdatePage,
+    protected: true,
+  },
+  {
+    path: '/profile/complete',
+    title: 'Complete Profile',
+    description: 'Finish setting up your profile.',
+    icon: <CheckCircleIcon />,
+    element: CompleteProfilePage,
+    protected: true,
+  },
+  {
+    path: '/change-password',
+    title: 'Change Password',
+    description: 'Update account password.',
+    icon: <Lock className="h-4 w-4" />,
+    element: ChangePasswordPage,
+    protected: true,
+  },
+];
+
+/* -------------------------------------------------------------------------- */
+/*                                Admin Routes                                */
+/* -------------------------------------------------------------------------- */
+
+export const adminRoutes: AppRoute[] = [
+  {
+    path: '/admin',
+    title: 'Admin Dashboard',
+    description: 'Admin overview and analytics.',
+    icon: <Gauge className="h-4 w-4" />,
+    element: AdminDashboardPage,
+    protected: true,
+    admin: true,
+    showInSidebar: true,
+  },
+  {
+    path: '/admin/profiles',
+    title: 'Profiles',
+    description: 'Manage user accounts and roles.',
+    icon: <Users className="h-4 w-4" />,
+    element: AdminProfilesPage,
+    protected: true,
+    admin: true,
+    showInSidebar: true,
+  },
+  {
+    path: '/admin/questions',
+    title: 'Questions',
+    description: 'Manage question bank content.',
+    icon: <BookOpen className="h-4 w-4" />,
+    element: AdminQuestionsPage,
+    protected: true,
+    admin: true,
+    showInSidebar: true,
+  },
+  {
+    path: '/admin/subjects',
+    title: 'Subjects',
+    description: 'Manage subjects and organization.',
+    icon: <Layers3 className="h-4 w-4" />,
+    element: AdminSubjectsPage,
+    protected: true,
+    admin: true,
+    showInSidebar: true,
+  },
+  {
+    path: '/admin/chapters',
+    title: 'Chapters',
+    description: 'Manage chapter structures.',
+    icon: <BookOpen className="h-4 w-4" />,
+    element: AdminChaptersPage,
+    protected: true,
+    admin: true,
+    showInSidebar: true,
+  },
+  {
+    path: '/admin/content',
+    title: 'Content',
+    description: 'Manage lessons and uploads.',
+    icon: <FileContentIcon />,
+    element: AdminContentPage,
+    protected: true,
+    admin: true,
+    showInSidebar: true,
+  },
+  {
+    path: '/admin/settings',
+    title: 'Admin Settings',
+    description: 'Control system configurations.',
+    icon: <Settings className="h-4 w-4" />,
+    element: AdminSettingsPage,
+    protected: true,
+    admin: true,
+    showInSidebar: true,
+  },
+];
+
+/* -------------------------------------------------------------------------- */
+/*                              Combined Exports                              */
+/* -------------------------------------------------------------------------- */
+
+export const allRoutes: AppRoute[] = [
+  ...publicRoutes,
+  ...protectedRoutes,
+  ...adminRoutes,
+];
+
+/* -------------------------------------------------------------------------- */
+/*                              Helper Functions                              */
+/* -------------------------------------------------------------------------- */
+
+export function getSidebarRoutes() {
+  return allRoutes.filter((route) => route.showInSidebar);
 }
 
-export const publicRoutes: AppRouteConfig[] =
-  [
-    {
-      path: '/',
-      element: (
-        <PageLoader>
-          <HomePage />
-        </PageLoader>
-      ),
-      meta: {
-        title: 'BEP Home',
-        showInNavbar: true,
-      },
-    },
+export function getNavbarRoutes() {
+  return allRoutes.filter((route) => route.showInNavbar);
+}
 
-    {
-      path: '/about',
-      element: (
-        <PageLoader>
-          <AboutPage />
-        </PageLoader>
-      ),
-      meta: {
-        title: 'About BEP',
-        showInNavbar: true,
-      },
-    },
+export function findRouteByPath(path: string) {
+  return allRoutes.find((route) => route.path === path);
+}
 
-    {
-      path: '/contact',
-      element: (
-        <PageLoader>
-          <ContactPage />
-        </PageLoader>
-      ),
-      meta: {
-        title: 'Contact',
-        showInNavbar: true,
-      },
-    },
+/* -------------------------------------------------------------------------- */
+/*                              Internal Icons                                */
+/* -------------------------------------------------------------------------- */
 
-    {
-      path: '/privacy-policy',
-      element: (
-        <PageLoader>
-          <PrivacyPolicyPage />
-        </PageLoader>
-      ),
-      meta: {
-        title: 'Privacy Policy',
-      },
-    },
+function CheckCircleIcon() {
+  return <CheckCircle2 className="h-4 w-4" />;
+}
 
-    {
-      path: '/terms',
-      element: (
-        <PageLoader>
-          <TermsPage />
-        </PageLoader>
-      ),
-      meta: {
-        title: 'Terms & Conditions',
-      },
-    },
+function FileContentIcon() {
+  return <FileTextIcon />;
+}
 
-    {
-      path: '/login',
-      element: (
-        <PageLoader>
-          <LoginPage />
-        </PageLoader>
-      ),
-      meta: {
-        title: 'Login',
-      },
-    },
-
-    {
-      path: '/register',
-      element: (
-        <PageLoader>
-          <RegisterPage />
-        </PageLoader>
-      ),
-      meta: {
-        title: 'Register',
-      },
-    },
-
-    {
-      path: '/forgot-password',
-      element: (
-        <PageLoader>
-          <ForgotPasswordPage />
-        </PageLoader>
-      ),
-      meta: {
-        title: 'Forgot Password',
-      },
-    },
-  ];
-
-export const protectedRoutes: AppRouteConfig[] =
-  [
-    {
-      path: '/dashboard',
-      element: (
-        <ProtectedRoute>
-          <PageLoader>
-            <DashboardPage />
-          </PageLoader>
-        </ProtectedRoute>
-      ),
-      meta: {
-        title: 'Dashboard',
-        requiresAuth: true,
-        showInSidebar: true,
-      },
-    },
-
-    {
-      path: '/subjects',
-      element: (
-        <ProtectedRoute>
-          <PageLoader>
-            <SubjectsPage />
-          </PageLoader>
-        </ProtectedRoute>
-      ),
-      meta: {
-        title: 'Subjects',
-        requiresAuth: true,
-        showInSidebar: true,
-      },
-    },
-
-    {
-      path: '/subjects/:subjectId',
-      element: (
-        <ProtectedRoute>
-          <PageLoader>
-            <SubjectDetailsPage />
-          </PageLoader>
-        </ProtectedRoute>
-      ),
-      meta: {
-        title: 'Subject Details',
-        requiresAuth: true,
-      },
-    },
-
-    {
-      path: '/chapters/:chapterId',
-      element: (
-        <ProtectedRoute>
-          <PageLoader>
-            <ChapterDetailsPage />
-          </PageLoader>
-        </ProtectedRoute>
-      ),
-      meta: {
-        title: 'Chapter',
-        requiresAuth: true,
-      },
-    },
-
-    {
-      path: '/practice',
-      element: (
-        <ProtectedRoute>
-          <PageLoader>
-            <PracticePage />
-          </PageLoader>
-        </ProtectedRoute>
-      ),
-      meta: {
-        title: 'Practice',
-        requiresAuth: true,
-        showInSidebar: true,
-      },
-    },
-
-    {
-      path: '/mock-exams',
-      element: (
-        <ProtectedRoute>
-          <PageLoader>
-            <MockExamPage />
-          </PageLoader>
-        </ProtectedRoute>
-      ),
-      meta: {
-        title: 'Mock Exams',
-        requiresAuth: true,
-        showInSidebar: true,
-      },
-    },
-
-    {
-      path: '/analytics',
-      element: (
-        <ProtectedRoute>
-          <PageLoader>
-            <AnalyticsPage />
-          </PageLoader>
-        </ProtectedRoute>
-      ),
-      meta: {
-        title: 'Analytics',
-        requiresAuth: true,
-        showInSidebar: true,
-      },
-    },
-
-    {
-      path: '/community',
-      element: (
-        <ProtectedRoute>
-          <PageLoader>
-            <CommunityPage />
-          </PageLoader>
-        </ProtectedRoute>
-      ),
-      meta: {
-        title: 'Community',
-        requiresAuth: true,
-        showInSidebar: true,
-      },
-    },
-
-    {
-      path: '/community/:postId',
-      element: (
-        <ProtectedRoute>
-          <PageLoader>
-            <CommunityPostPage />
-          </PageLoader>
-        </ProtectedRoute>
-      ),
-      meta: {
-        title: 'Community Post',
-        requiresAuth: true,
-      },
-    },
-
-    {
-      path: '/leaderboard',
-      element: (
-        <ProtectedRoute>
-          <PageLoader>
-            <LeaderboardPage />
-          </PageLoader>
-        </ProtectedRoute>
-      ),
-      meta: {
-        title: 'Leaderboard',
-        requiresAuth: true,
-        showInSidebar: true,
-      },
-    },
-
-    {
-      path: '/profile',
-      element: (
-        <ProtectedRoute>
-          <PageLoader>
-            <ProfilePage />
-          </PageLoader>
-        </ProtectedRoute>
-      ),
-      meta: {
-        title: 'Profile',
-        requiresAuth: true,
-      },
-    },
-
-    {
-      path: '/settings',
-      element: (
-        <ProtectedRoute>
-          <PageLoader>
-            <SettingsPage />
-          </PageLoader>
-        </ProtectedRoute>
-      ),
-      meta: {
-        title: 'Settings',
-        requiresAuth: true,
-      },
-    },
-
-    {
-      path: '/premium',
-      element: (
-        <ProtectedRoute>
-          <PageLoader>
-            <PremiumPage />
-          </PageLoader>
-        </ProtectedRoute>
-      ),
-      meta: {
-        title: 'Premium',
-        requiresAuth: true,
-        premium: true,
-      },
-    },
-  ];
-
-export const adminRoutes: AppRouteConfig[] =
-  [
-    {
-      path: '/admin',
-      element: (
-        <AdminRoute>
-          <PageLoader>
-            <AdminDashboardPage />
-          </PageLoader>
-        </AdminRoute>
-      ),
-      meta: {
-        title: 'Admin Dashboard',
-        requiresAuth: true,
-        requiresAdmin: true,
-      },
-    },
-
-    {
-      path: '/admin/subjects',
-      element: (
-        <AdminRoute>
-          <PageLoader>
-            <AdminSubjectsPage />
-          </PageLoader>
-        </AdminRoute>
-      ),
-      meta: {
-        title: 'Manage Subjects',
-        requiresAuth: true,
-        requiresAdmin: true,
-      },
-    },
-
-    {
-      path: '/admin/questions',
-      element: (
-        <AdminRoute>
-          <PageLoader>
-            <AdminQuestionsPage />
-          </PageLoader>
-        </AdminRoute>
-      ),
-      meta: {
-        title: 'Manage Questions',
-        requiresAuth: true,
-        requiresAdmin: true,
-      },
-    },
-
-    {
-      path: '/admin/users',
-      element: (
-        <AdminRoute>
-          <PageLoader>
-            <AdminUsersPage />
-          </PageLoader>
-        </AdminRoute>
-      ),
-      meta: {
-        title: 'Manage Users',
-        requiresAuth: true,
-        requiresAdmin: true,
-      },
-    },
-
-    {
-      path: '/admin/cms',
-      element: (
-        <AdminRoute>
-          <PageLoader>
-            <AdminCMSPage />
-          </PageLoader>
-        </AdminRoute>
-      ),
-      meta: {
-        title: 'CMS',
-        requiresAuth: true,
-        requiresAdmin: true,
-      },
-    },
-  ];
-
-export const systemRoutes: AppRouteConfig[] =
-  [
-    {
-      path: '/404',
-      element: (
-        <PageLoader>
-          <NotFoundPage />
-        </PageLoader>
-      ),
-      meta: {
-        title: 'Not Found',
-      },
-    },
-
-    {
-      path: '*',
-      element: (
-        <Navigate
-          to="/404"
-          replace
-        />
-      ),
-    },
-  ];
-
-export const routeConfig: AppRouteConfig[] =
-  [
-    ...publicRoutes,
-    ...protectedRoutes,
-    ...adminRoutes,
-    ...systemRoutes,
-  ];
-
-export default routeConfig;
+function FileTextIcon() {
+  return <BookOpen className="h-4 w-4" />;
+}
