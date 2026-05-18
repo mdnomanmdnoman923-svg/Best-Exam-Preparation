@@ -1,96 +1,227 @@
+// bep-full-project/src/services/auth.service.ts
+
 import {
-  auth,
-  googleProvider,
-  signInWithPopup,
-  signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signOut,
-  sendPasswordResetEmail,
-  updatePassword,
   EmailAuthProvider,
   reauthenticateWithCredential,
-} from '@/firebase/auth'
-import { updateProfile } from 'firebase/auth'
-import type { LoginCredentials, RegisterCredentials } from '@/types/auth.types'
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+  signOut,
+  updatePassword,
+  updateProfile,
+  type User,
+} from 'firebase/auth';
+import {
+  doc,
+  getDoc,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+} from 'firebase/firestore';
 
-export const authService = {
-  /**
-   * Sign in with Google OAuth popup.
-   * Returns the Firebase User on success.
-   */
-  async signInWithGoogle() {
-    const result = await signInWithPopup(auth, googleProvider)
-    return result.user
-  },
+import { auth } from '@/firebase/auth';
+import { db } from '@/firebase/firestore';
 
-  /**
-   * Sign in with email + password.
-   */
-  async signInWithEmail({ email, password }: LoginCredentials) {
-    const result = await signInWithEmailAndPassword(auth, email, password)
-    return result.user
-  },
+export type AuthRole = 'student' | 'moderator' | 'admin' | 'super_admin';
 
-  /**
-   * Create a new account with email + password.
-   * Also sets displayName on the Firebase Auth profile.
-   */
-  async registerWithEmail({ email, password, displayName }: RegisterCredentials) {
-    const result = await createUserWithEmailAndPassword(auth, email, password)
-    await updateProfile(result.user, { displayName })
-    return result.user
-  },
+export interface AuthProfile {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  photoURL: string | null;
+  role: AuthRole;
+  className?: string;
+  batch?: string;
+  institution?: string;
+  subject?: string;
+  language?: 'bn' | 'en';
+  createdAt?: unknown;
+  updatedAt?: unknown;
+}
 
-  /**
-   * Sign out the current user.
-   */
-  async signOut() {
-    await signOut(auth)
-  },
+export interface SignInPayload {
+  email: string;
+  password: string;
+  rememberMe?: boolean;
+}
 
-  /**
-   * Send a password reset email.
-   */
-  async sendPasswordReset(email: string) {
-    await sendPasswordResetEmail(auth, email)
-  },
+export interface SignUpPayload {
+  fullName: string;
+  email: string;
+  password: string;
+  role?: AuthRole;
+}
 
-  /**
-   * Change the current user's password.
-   * Re-authenticates first to satisfy Firebase security requirements.
-   */
-  async changePassword(currentPassword: string, newPassword: string) {
-    const user = auth.currentUser
-    if (!user || !user.email) {
-      throw new Error('ব্যবহারকারী খুঁজে পাওয়া যায়নি')
-    }
-    const credential = EmailAuthProvider.credential(user.email, currentPassword)
-    await reauthenticateWithCredential(user, credential)
-    await updatePassword(user, newPassword)
-  },
+export interface UpdateProfilePayload {
+  displayName?: string;
+  photoURL?: string;
+  className?: string;
+  batch?: string;
+  institution?: string;
+  subject?: string;
+  language?: 'bn' | 'en';
+}
 
-  /**
-   * Update the Firebase Auth displayName and/or photoURL.
-   */
-  async updateAuthProfile(data: { displayName?: string; photoURL?: string }) {
-    const user = auth.currentUser
-    if (!user) throw new Error('ব্যবহারকারী খুঁজে পাওয়া যায়নি')
-    await updateProfile(user, data)
-  },
+const PROFILES_COLLECTION = 'profiles';
 
-  /**
-   * Get the currently signed-in Firebase Auth user (synchronous snapshot).
-   */
-  getCurrentUser() {
-    return auth.currentUser
-  },
+function profileRef(uid: string) {
+  return doc(db, PROFILES_COLLECTION, uid);
+}
 
-  /**
-   * Get the current user's ID token (for API calls / Cloud Functions).
-   */
-  async getIdToken(forceRefresh = false): Promise<string | null> {
-    const user = auth.currentUser
-    if (!user) return null
-    return user.getIdToken(forceRefresh)
-  },
+function normalizeDisplayName(fullName: string) {
+  return fullName.trim().replace(/\s+/g, ' ');
+}
+
+export function getFriendlyAuthError(error: unknown): string {
+  if (typeof error !== 'object' || error === null) {
+    return 'Something went wrong. Please try again.';
+  }
+
+  const maybeFirebaseError = error as { code?: string; message?: string };
+  const code = maybeFirebaseError.code ?? '';
+  const message = maybeFirebaseError.message ?? 'Something went wrong. Please try again.';
+
+  const map: Record<string, string> = {
+    'auth/invalid-email': 'Please enter a valid email address.',
+    'auth/user-not-found': 'No account found with this email.',
+    'auth/wrong-password': 'Incorrect password.',
+    'auth/invalid-credential': 'Invalid email or password.',
+    'auth/email-already-in-use': 'An account already exists with this email.',
+    'auth/weak-password': 'Password is too weak. Use at least 8 characters.',
+    'auth/too-many-requests': 'Too many attempts. Please try again later.',
+    'auth/user-disabled': 'This account has been disabled.',
+    'auth/requires-recent-login': 'Please sign in again and retry this action.',
+    'permission-denied': 'You do not have permission to perform this action.',
+    'unavailable': 'Service is temporarily unavailable. Please try again.',
+  };
+
+  return map[code] || message;
+}
+
+export function isAuthenticated(user: User | null | undefined): user is User {
+  return Boolean(user);
+}
+
+export async function signIn(payload: SignInPayload) {
+  const { email, password } = payload;
+
+  const credential = await signInWithEmailAndPassword(
+    auth,
+    email.trim(),
+    password,
+  );
+
+  return credential.user;
+}
+
+export async function signUp(payload: SignUpPayload) {
+  const { fullName, email, password, role = 'student' } = payload;
+
+  const credential = await createUserWithEmailAndPassword(
+    auth,
+    email.trim(),
+    password,
+  );
+
+  const displayName = normalizeDisplayName(fullName);
+
+  await updateProfile(credential.user, {
+    displayName,
+  });
+
+  const profile: AuthProfile = {
+    uid: credential.user.uid,
+    email: credential.user.email,
+    displayName,
+    photoURL: credential.user.photoURL,
+    role,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  };
+
+  await setDoc(profileRef(credential.user.uid), profile, { merge: true });
+
+  return credential.user;
+}
+
+export async function signOutUser() {
+  await signOut(auth);
+}
+
+export async function sendResetPassword(email: string) {
+  await sendPasswordResetEmail(auth, email.trim());
+}
+
+export async function sendVerificationEmail() {
+  if (!auth.currentUser) {
+    throw new Error('No authenticated user.');
+  }
+
+  await sendEmailVerification(auth.currentUser);
+}
+
+export async function refreshAuthProfile(user: User, payload: UpdateProfilePayload) {
+  const nextProfile: UpdateProfilePayload = {
+    ...payload,
+    displayName: payload.displayName?.trim() || undefined,
+  };
+
+  await updateProfile(user, {
+    displayName: nextProfile.displayName ?? user.displayName ?? null,
+    photoURL: nextProfile.photoURL ?? user.photoURL ?? null,
+  });
+
+  await setDoc(
+    profileRef(user.uid),
+    {
+      uid: user.uid,
+      email: user.email,
+      displayName: nextProfile.displayName ?? user.displayName,
+      photoURL: nextProfile.photoURL ?? user.photoURL,
+      className: nextProfile.className,
+      batch: nextProfile.batch,
+      institution: nextProfile.institution,
+      subject: nextProfile.subject,
+      language: nextProfile.language,
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true },
+  );
+}
+
+export async function getAuthProfile(uid: string): Promise<AuthProfile | null> {
+  const snapshot = await getDoc(profileRef(uid));
+
+  if (!snapshot.exists()) {
+    return null;
+  }
+
+  return snapshot.data() as AuthProfile;
+}
+
+export async function updateAuthProfile(
+  uid: string,
+  payload: Partial<AuthProfile>,
+) {
+  await updateDoc(profileRef(uid), {
+    ...payload,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function changeUserPassword(currentPassword: string, newPassword: string) {
+  const user = auth.currentUser;
+
+  if (!user || !user.email) {
+    throw new Error('No authenticated user.');
+  }
+
+  const credential = EmailAuthProvider.credential(user.email, currentPassword);
+  await reauthenticateWithCredential(user, credential);
+  await updatePassword(user, newPassword);
+}
+
+export function getCurrentUser() {
+  return auth.currentUser;
 }
