@@ -1,111 +1,35 @@
 {
   "compilerOptions": {
-    /* -------------------------------------------------------------------- */
-    /* Language & Environment                                               */
-    /* -------------------------------------------------------------------- */
-
     "target": "ES2022",
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
-
     "module": "ESNext",
     "moduleResolution": "Bundler",
-
     "jsx": "react-jsx",
 
-    /* -------------------------------------------------------------------- */
-    /* Strictness                                                           */
-    /* -------------------------------------------------------------------- */
-
     "strict": true,
-
     "noImplicitAny": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
-
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-
     "noFallthroughCasesInSwitch": true,
-
-    /* -------------------------------------------------------------------- */
-    /* Imports                                                              */
-    /* -------------------------------------------------------------------- */
 
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-
     "resolveJsonModule": true,
-
     "isolatedModules": true,
-
-    /* -------------------------------------------------------------------- */
-    /* Build                                                                */
-    /* -------------------------------------------------------------------- */
-
     "skipLibCheck": true,
-
     "forceConsistentCasingInFileNames": true,
-
     "noEmit": true,
 
-    /* -------------------------------------------------------------------- */
-    /* Paths                                                                */
-    /* -------------------------------------------------------------------- */
-
     "baseUrl": ".",
-
     "paths": {
-      "@/*": ["src/*"],
-
-      "@/components/*": ["src/components/*"],
-      "@/features/*": ["src/features/*"],
-      "@/pages/*": ["src/pages/*"],
-      "@/layouts/*": ["src/layouts/*"],
-      "@/routes/*": ["src/routes/*"],
-
-      "@/services/*": ["src/services/*"],
-      "@/firebase/*": ["src/firebase/*"],
-
-      "@/hooks/*": ["src/hooks/*"],
-      "@/store/*": ["src/store/*"],
-
-      "@/types/*": ["src/types/*"],
-      "@/styles/*": ["src/styles/*"],
-
-      "@/lib/*": ["src/lib/*"],
-      "@/assets/*": ["src/assets/*"]
+      "@/*": ["src/*"]
     },
 
-    /* -------------------------------------------------------------------- */
-    /* Type Definitions                                                     */
-    /* -------------------------------------------------------------------- */
-
     "types": ["vite/client"],
-
-    /* -------------------------------------------------------------------- */
-    /* Experimental                                                         */
-    /* -------------------------------------------------------------------- */
-
     "useDefineForClassFields": true
   },
-
-  /* ---------------------------------------------------------------------- */
-  /* Include                                                                */
-  /* ---------------------------------------------------------------------- */
-
-  "include": [
-    "src",
-    "vite.config.ts",
-    "tailwind.config.ts"
-  ],
-
-  /* ---------------------------------------------------------------------- */
-  /* Exclude                                                                */
-  /* ---------------------------------------------------------------------- */
-
-  "exclude": [
-    "node_modules",
-    "dist",
-    "build"
-  ]
+  "include": ["src", "vite.config.ts", "tailwind.config.ts", "postcss.config.js"],
+  "exclude": ["node_modules", "dist", "build"]
 }
