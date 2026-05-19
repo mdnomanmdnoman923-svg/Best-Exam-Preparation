@@ -1,5 +1,3 @@
-// bep-full-project/src/services/auth.service.ts
-
 import {
   createUserWithEmailAndPassword,
   EmailAuthProvider,
@@ -17,7 +15,7 @@ import {
   getDoc,
   serverTimestamp,
   setDoc,
-  updateDoc,
+  type DocumentData,
 } from 'firebase/firestore';
 
 import { auth } from '@/firebase/auth';
@@ -30,12 +28,27 @@ export interface AuthProfile {
   email: string | null;
   displayName: string | null;
   photoURL: string | null;
+
   role: AuthRole;
+
+  username?: string;
+  bio?: string;
+  avatarUrl?: string;
+  coverUrl?: string;
+  location?: string;
+
   className?: string;
   batch?: string;
   institution?: string;
   subject?: string;
   language?: 'bn' | 'en';
+
+  premium?: boolean;
+  verified?: boolean;
+  streakDays?: number;
+  xp?: number;
+  level?: number;
+
   createdAt?: unknown;
   updatedAt?: unknown;
 }
@@ -104,12 +117,10 @@ export function isAuthenticated(user: User | null | undefined): user is User {
 }
 
 export async function signIn(payload: SignInPayload) {
-  const { email, password } = payload;
-
   const credential = await signInWithEmailAndPassword(
     auth,
-    email.trim(),
-    password,
+    payload.email.trim(),
+    payload.password,
   );
 
   return credential.user;
@@ -136,6 +147,21 @@ export async function signUp(payload: SignUpPayload) {
     displayName,
     photoURL: credential.user.photoURL,
     role,
+    username: '',
+    bio: '',
+    avatarUrl: credential.user.photoURL ?? '',
+    coverUrl: '',
+    location: '',
+    className: '',
+    batch: '',
+    institution: '',
+    subject: '',
+    language: 'bn',
+    premium: false,
+    verified: false,
+    streakDays: 0,
+    xp: 0,
+    level: 1,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   };
@@ -162,14 +188,12 @@ export async function sendVerificationEmail() {
 }
 
 export async function refreshAuthProfile(user: User, payload: UpdateProfilePayload) {
-  const nextProfile: UpdateProfilePayload = {
-    ...payload,
-    displayName: payload.displayName?.trim() || undefined,
-  };
+  const displayName = payload.displayName?.trim() || user.displayName || null;
+  const photoURL = payload.photoURL?.trim() || user.photoURL || null;
 
   await updateProfile(user, {
-    displayName: nextProfile.displayName ?? user.displayName ?? null,
-    photoURL: nextProfile.photoURL ?? user.photoURL ?? null,
+    displayName,
+    photoURL,
   });
 
   await setDoc(
@@ -177,15 +201,15 @@ export async function refreshAuthProfile(user: User, payload: UpdateProfilePaylo
     {
       uid: user.uid,
       email: user.email,
-      displayName: nextProfile.displayName ?? user.displayName,
-      photoURL: nextProfile.photoURL ?? user.photoURL,
-      className: nextProfile.className,
-      batch: nextProfile.batch,
-      institution: nextProfile.institution,
-      subject: nextProfile.subject,
-      language: nextProfile.language,
+      displayName,
+      photoURL,
+      className: payload.className,
+      batch: payload.batch,
+      institution: payload.institution,
+      subject: payload.subject,
+      language: payload.language,
       updatedAt: serverTimestamp(),
-    },
+    } satisfies Partial<AuthProfile> as DocumentData,
     { merge: true },
   );
 }
@@ -204,10 +228,14 @@ export async function updateAuthProfile(
   uid: string,
   payload: Partial<AuthProfile>,
 ) {
-  await updateDoc(profileRef(uid), {
-    ...payload,
-    updatedAt: serverTimestamp(),
-  });
+  await setDoc(
+    profileRef(uid),
+    {
+      ...payload,
+      updatedAt: serverTimestamp(),
+    } as DocumentData,
+    { merge: true },
+  );
 }
 
 export async function changeUserPassword(currentPassword: string, newPassword: string) {
