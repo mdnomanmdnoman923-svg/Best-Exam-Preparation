@@ -1,337 +1,211 @@
 // bep-full-project/src/features/subjects/components/SubjectProgressCard.tsx
 
-import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
+
 import {
-  ArrowRight,
   BookOpen,
   CheckCircle2,
   Clock3,
-  Crown,
-  Flame,
-  Sparkles,
-  Star,
-  Target,
   TrendingUp,
-  Trophy,
-  Wand2,
 } from 'lucide-react';
 
-import Badge from '@/components/ui/Badge';
-import Button from '@/components/ui/Button';
-
-export interface SubjectProgressMilestone {
-  id: string;
-  title: string;
-  value: number;
-  description?: string;
-  unlocked?: boolean;
-  premium?: boolean;
-}
-
-export interface SubjectProgressCardProps {
-  title?: string;
-  subtitle?: string;
+interface SubjectProgressCardProps {
   subjectName?: string;
-  level?: string;
-  completion?: number;
-  averageScore?: number;
-  totalQuestions?: number;
-  completedQuestions?: number;
+
+  progress?: number;
+
   totalChapters?: number;
   completedChapters?: number;
-  totalPracticeMinutes?: number;
-  streakDays?: number;
-  premium?: boolean;
+
+  totalQuestions?: number;
+  solvedQuestions?: number;
+
+  studyHours?: number;
+
   loading?: boolean;
-  milestones?: SubjectProgressMilestone[];
-  onViewDetails?: () => void;
-  onStartPractice?: () => void;
-  onContinue?: () => void;
-  className?: string;
-}
-
-function clamp(value: number, min: number, max: number) {
-  return Math.min(max, Math.max(min, value));
-}
-
-function formatMinutes(minutes: number) {
-  if (minutes < 60) return `${minutes}m`;
-  const hours = Math.floor(minutes / 60);
-  const remaining = minutes % 60;
-  if (remaining === 0) return `${hours}h`;
-  return `${hours}h ${remaining}m`;
-}
-
-function formatPercent(value: number) {
-  return `${clamp(Math.round(value), 0, 100)}%`;
-}
-
-function defaultMilestones(
-  subjectName: string,
-): SubjectProgressMilestone[] {
-  return [
-    {
-      id: 'start',
-      title: 'Getting Started',
-      value: 20,
-      description: `${subjectName} topic exploration শুরু করুন`,
-      unlocked: true,
-    },
-    {
-      id: 'practice',
-      title: 'Practice Builder',
-      value: 50,
-      description: 'Regular practice session complete করুন',
-      unlocked: false,
-    },
-    {
-      id: 'mastery',
-      title: 'Subject Mastery',
-      value: 80,
-      description: 'High score consistency অর্জন করুন',
-      unlocked: false,
-      premium: true,
-    },
-    {
-      id: 'elite',
-      title: 'Elite Rank',
-      value: 100,
-      description: 'Complete mastery and leaderboard impact',
-      unlocked: false,
-      premium: true,
-    },
-  ];
 }
 
 export default function SubjectProgressCard({
-  title = 'Subject Progress',
-  subtitle = 'আপনার subject-wise study progress, practice, এবং mastery এক নজরে দেখুন',
-  subjectName = 'Subject',
-  level,
-  completion = 0,
-  averageScore = 0,
-  totalQuestions = 0,
-  completedQuestions = 0,
+  subjectName = 'Mathematics',
+
+  progress = 0,
+
   totalChapters = 0,
   completedChapters = 0,
-  totalPracticeMinutes = 0,
-  streakDays = 0,
-  premium = false,
+
+  totalQuestions = 0,
+  solvedQuestions = 0,
+
+  studyHours = 0,
+
   loading = false,
-  milestones,
-  onViewDetails,
-  onStartPractice,
-  onContinue,
-  className = '',
 }: SubjectProgressCardProps) {
-  const safeCompletion = clamp(completion, 0, 100);
-  const safeAverageScore = clamp(averageScore, 0, 100);
-  const safeCompletedQuestions = Math.max(0, completedQuestions);
-  const safeTotalQuestions = Math.max(0, totalQuestions);
-  const safeCompletedChapters = Math.max(0, completedChapters);
-  const safeTotalChapters = Math.max(0, totalChapters);
-  const safePracticeMinutes = Math.max(0, totalPracticeMinutes);
-  const safeStreak = Math.max(0, streakDays);
+  if (loading) {
+    return (
+      <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-xl">
+        <div className="animate-pulse">
+          <div className="h-6 w-40 rounded bg-white/10" />
 
-  const completionRate = useMemo(() => {
-    if (safeTotalQuestions === 0) return safeCompletion;
-    return clamp(
-      Math.round((safeCompletedQuestions / safeTotalQuestions) * 100),
-      0,
-      100,
+          <div className="mt-6 h-3 w-full rounded-full bg-white/10" />
+
+          <div className="mt-6 grid grid-cols-2 gap-4">
+            {[1, 2, 3, 4].map((item) => (
+              <div
+                key={item}
+                className="h-24 rounded-2xl bg-white/[0.03]"
+              />
+            ))}
+          </div>
+        </div>
+      </div>
     );
-  }, [safeCompletedQuestions, safeCompletion, safeTotalQuestions]);
-
-  const chapterRate = useMemo(() => {
-    if (safeTotalChapters === 0) return 0;
-    return clamp(
-      Math.round((safeCompletedChapters / safeTotalChapters) * 100),
-      0,
-      100,
-    );
-  }, [safeCompletedChapters, safeTotalChapters]);
-
-  const subjectMilestones = useMemo(
-    () => milestones || defaultMilestones(subjectName),
-    [milestones, subjectName],
-  );
-
-  const progressLabel = useMemo(() => {
-    if (safeCompletion >= 90) return 'Excellent';
-    if (safeCompletion >= 75) return 'Strong';
-    if (safeCompletion >= 50) return 'Growing';
-    if (safeCompletion >= 20) return 'Building';
-    return 'Getting Started';
-  }, [safeCompletion]);
+  }
 
   return (
     <motion.section
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className={[
-        'overflow-hidden rounded-[32px] border border-white/10 bg-white/[0.04]',
-        'shadow-[0_18px_70px_rgba(0,0,0,0.30)] backdrop-blur-2xl',
-        className,
-      ].join(' ')}
+      initial={{
+        opacity: 0,
+        y: 12,
+      }}
+      animate={{
+        opacity: 1,
+        y: 0,
+      }}
+      transition={{
+        duration: 0.3,
+      }}
+      whileHover={{
+        y: -2,
+      }}
+      className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-xl"
     >
-      <div className="relative overflow-hidden border-b border-white/10 p-6">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(14,165,233,0.10),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(168,85,247,0.10),transparent_28%)]" />
+      {/* Header */}
 
-        <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-fuchsia-400/15 bg-fuchsia-400/10 px-3 py-1 text-xs font-semibold text-fuchsia-100">
-              <Sparkles className="h-3.5 w-3.5" />
-              BEP Subject Progress
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-sm text-cyan-300">
+            Subject Progress
+          </p>
+
+          <h2 className="mt-2 text-2xl font-bold text-white">
+            {subjectName}
+          </h2>
+        </div>
+
+        <div className="rounded-2xl bg-cyan-400/10 p-3 text-cyan-300">
+          <TrendingUp size={22} />
+        </div>
+      </div>
+
+      {/* Progress */}
+
+      <div className="mt-6">
+        <div className="mb-2 flex items-center justify-between">
+          <span className="text-sm text-white/60">
+            Overall Completion
+          </span>
+
+          <span className="text-sm font-semibold text-cyan-300">
+            {progress}%
+          </span>
+        </div>
+
+        <div className="h-3 overflow-hidden rounded-full bg-white/10">
+          <motion.div
+            initial={{
+              width: 0,
+            }}
+            animate={{
+              width: `${progress}%`,
+            }}
+            transition={{
+              duration: 0.8,
+            }}
+            className="h-full rounded-full bg-cyan-400"
+          />
+        </div>
+      </div>
+
+      {/* Stats */}
+
+      <div className="mt-7 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {/* Chapters */}
+
+        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+          <div className="flex items-center gap-3">
+            <div className="rounded-xl bg-violet-500/10 p-2 text-violet-300">
+              <BookOpen size={18} />
             </div>
 
-            <h2 className="text-3xl font-bold tracking-tight text-white">
-              {title}
-            </h2>
+            <div>
+              <p className="text-xs text-white/50">
+                Chapters
+              </p>
 
-            <p className="mt-2 max-w-2xl text-sm leading-7 text-white/60">
-              {subtitle}
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            <Badge variant="premium">
-              <BookOpen className="mr-1 h-3.5 w-3.5" />
-              {subjectName}
-            </Badge>
-
-            {level ? <Badge variant="secondary">{level}</Badge> : null}
-
-            {premium ? (
-              <Badge variant="premium">
-                <Crown className="mr-1 h-3.5 w-3.5" />
-                Premium
-              </Badge>
-            ) : null}
+              <h3 className="mt-1 text-lg font-bold text-white">
+                {completedChapters}/{totalChapters}
+              </h3>
+            </div>
           </div>
         </div>
 
-        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <div className="rounded-[28px] border border-white/10 bg-[#08111F]/75 p-5 backdrop-blur-xl">
-            <div className="flex items-center gap-2 text-cyan-100">
-              <Target className="h-4 w-4" />
-              <span className="text-xs font-semibold uppercase tracking-wide">
-                Completion
-              </span>
+        {/* Questions */}
+
+        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+          <div className="flex items-center gap-3">
+            <div className="rounded-xl bg-emerald-500/10 p-2 text-emerald-300">
+              <CheckCircle2 size={18} />
             </div>
 
-            <h3 className="mt-3 text-4xl font-bold tracking-tight text-white">
-              {formatPercent(safeCompletion)}
-            </h3>
+            <div>
+              <p className="text-xs text-white/50">
+                Questions Solved
+              </p>
 
-            <p className="mt-2 text-sm leading-6 text-white/55">
-              Overall learning progress
-            </p>
+              <h3 className="mt-1 text-lg font-bold text-white">
+                {solvedQuestions}/{totalQuestions}
+              </h3>
+            </div>
           </div>
+        </div>
 
-          <div className="rounded-[28px] border border-white/10 bg-[#08111F]/75 p-5 backdrop-blur-xl">
-            <div className="flex items-center gap-2 text-emerald-100">
-              <Trophy className="h-4 w-4" />
-              <span className="text-xs font-semibold uppercase tracking-wide">
-                Average score
-              </span>
+        {/* Study Time */}
+
+        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:col-span-2">
+          <div className="flex items-center gap-3">
+            <div className="rounded-xl bg-cyan-500/10 p-2 text-cyan-300">
+              <Clock3 size={18} />
             </div>
 
-            <h3 className="mt-3 text-4xl font-bold tracking-tight text-white">
-              {formatPercent(safeAverageScore)}
-            </h3>
+            <div>
+              <p className="text-xs text-white/50">
+                Study Time
+              </p>
 
-            <p className="mt-2 text-sm leading-6 text-white/55">
-              Practice and exam performance
-            </p>
-          </div>
-
-          <div className="rounded-[28px] border border-white/10 bg-[#08111F]/75 p-5 backdrop-blur-xl">
-            <div className="flex items-center gap-2 text-orange-100">
-              <Flame className="h-4 w-4" />
-              <span className="text-xs font-semibold uppercase tracking-wide">
-                Streak
-              </span>
+              <h3 className="mt-1 text-lg font-bold text-white">
+                {studyHours} Hours
+              </h3>
             </div>
-
-            <h3 className="mt-3 text-4xl font-bold tracking-tight text-white">
-              {safeStreak}
-            </h3>
-
-            <p className="mt-2 text-sm leading-6 text-white/55">
-              Consecutive active days
-            </p>
-          </div>
-
-          <div className="rounded-[28px] border border-white/10 bg-[#08111F]/75 p-5 backdrop-blur-xl">
-            <div className="flex items-center gap-2 text-fuchsia-100">
-              <Clock3 className="h-4 w-4" />
-              <span className="text-xs font-semibold uppercase tracking-wide">
-                Practice time
-              </span>
-            </div>
-
-            <h3 className="mt-3 text-4xl font-bold tracking-tight text-white">
-              {formatMinutes(safePracticeMinutes)}
-            </h3>
-
-            <p className="mt-2 text-sm leading-6 text-white/55">
-              Total study minutes
-            </p>
           </div>
         </div>
       </div>
 
-      <div className="grid gap-6 p-6 xl:grid-cols-[1.1fr_0.9fr]">
-        <div className="space-y-6">
-          {loading ? (
-            <div className="space-y-4">
-              <div className="h-28 animate-pulse rounded-[28px] border border-white/10 bg-white/[0.04]" />
-              <div className="grid gap-4 md:grid-cols-2">
-                {[...Array(4)].map((_, index) => (
-                  <div
-                    key={index}
-                    className="h-32 animate-pulse rounded-[28px] border border-white/10 bg-white/[0.04]"
-                  />
-                ))}
-              </div>
-            </div>
-          ) : (
-            <>
-              <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-5">
-                <div className="mb-2 flex items-center justify-between text-xs">
-                  <span className="font-semibold uppercase tracking-wider text-white/45">
-                    Subject completion
-                  </span>
-                  <span className="font-bold text-cyan-100">
-                    {completionRate}%
-                  </span>
-                </div>
+      {/* Footer */}
 
-                <div className="h-3 overflow-hidden rounded-full bg-white/[0.06]">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${completionRate}%` }}
-                    transition={{ duration: 0.6, ease: 'easeOut' }}
-                    className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-fuchsia-500"
-                  />
-                </div>
+      <div className="mt-6 border-t border-white/10 pt-5">
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-white/55">
+            Keep practicing daily to improve your performance.
+          </p>
 
-                <div className="mt-5 grid gap-3 md:grid-cols-3">
-                  <div className="rounded-2xl border border-white/10 bg-[#08111F]/70 p-4">
-                    <div className="flex items-center gap-2 text-cyan-100">
-                      <BookOpen className="h-4 w-4" />
-                      <span className="text-xs font-semibold uppercase tracking-wide">
-                        Questions
-                      </span>
-                    </div>
-                    <h4 className="mt-2 text-2xl font-bold text-white">
-                      {safeCompletedQuestions}/{safeTotalQuestions || 0}
-                    </h4>
-                    <p className="mt-1 text-xs text-white/45">
-                      Completed vs total
-                    </p>
-                  </div>
-
-                  <div className
+          <button
+            type="button"
+            className="rounded-2xl bg-cyan-400 px-4 py-2 text-sm font-semibold text-black transition-all duration-300 hover:scale-[1.03] hover:bg-cyan-300"
+          >
+            Continue
+          </button>
+        </div>
+      </div>
+    </motion.section>
+  );
+}
