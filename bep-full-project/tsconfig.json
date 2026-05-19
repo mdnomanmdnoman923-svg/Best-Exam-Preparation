@@ -1,25 +1,111 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    /* -------------------------------------------------------------------- */
+    /* Language & Environment                                               */
+    /* -------------------------------------------------------------------- */
+
+    "target": "ES2022",
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+
     "module": "ESNext",
-    "skipLibCheck": true,
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
+    "moduleResolution": "Bundler",
+
     "jsx": "react-jsx",
+
+    /* -------------------------------------------------------------------- */
+    /* Strictness                                                           */
+    /* -------------------------------------------------------------------- */
+
     "strict": true,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
+
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+
     "noFallthroughCasesInSwitch": true,
+
+    /* -------------------------------------------------------------------- */
+    /* Imports                                                              */
+    /* -------------------------------------------------------------------- */
+
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+
+    "resolveJsonModule": true,
+
+    "isolatedModules": true,
+
+    /* -------------------------------------------------------------------- */
+    /* Build                                                                */
+    /* -------------------------------------------------------------------- */
+
+    "skipLibCheck": true,
+
+    "forceConsistentCasingInFileNames": true,
+
+    "noEmit": true,
+
+    /* -------------------------------------------------------------------- */
+    /* Paths                                                                */
+    /* -------------------------------------------------------------------- */
+
     "baseUrl": ".",
+
     "paths": {
-      "@/*": ["./src/*"]
-    }
+      "@/*": ["src/*"],
+
+      "@/components/*": ["src/components/*"],
+      "@/features/*": ["src/features/*"],
+      "@/pages/*": ["src/pages/*"],
+      "@/layouts/*": ["src/layouts/*"],
+      "@/routes/*": ["src/routes/*"],
+
+      "@/services/*": ["src/services/*"],
+      "@/firebase/*": ["src/firebase/*"],
+
+      "@/hooks/*": ["src/hooks/*"],
+      "@/store/*": ["src/store/*"],
+
+      "@/types/*": ["src/types/*"],
+      "@/styles/*": ["src/styles/*"],
+
+      "@/lib/*": ["src/lib/*"],
+      "@/assets/*": ["src/assets/*"]
+    },
+
+    /* -------------------------------------------------------------------- */
+    /* Type Definitions                                                     */
+    /* -------------------------------------------------------------------- */
+
+    "types": ["vite/client"],
+
+    /* -------------------------------------------------------------------- */
+    /* Experimental                                                         */
+    /* -------------------------------------------------------------------- */
+
+    "useDefineForClassFields": true
   },
-  "include": ["src"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+
+  /* ---------------------------------------------------------------------- */
+  /* Include                                                                */
+  /* ---------------------------------------------------------------------- */
+
+  "include": [
+    "src",
+    "vite.config.ts",
+    "tailwind.config.ts"
+  ],
+
+  /* ---------------------------------------------------------------------- */
+  /* Exclude                                                                */
+  /* ---------------------------------------------------------------------- */
+
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build"
+  ]
 }
