@@ -1,25 +1,14 @@
-# --------------------------------------------------
 # Dependencies
-# --------------------------------------------------
-
 node_modules/
-.pnp/
-.pnp.js
+functions/node_modules/
 
-# --------------------------------------------------
-# Build Output
-# --------------------------------------------------
-
+# Build output
 dist/
 build/
-.next/
-out/
+functions/lib/
 coverage/
 
-# --------------------------------------------------
 # Logs
-# --------------------------------------------------
-
 logs/
 *.log
 npm-debug.log*
@@ -28,28 +17,23 @@ yarn-error.log*
 pnpm-debug.log*
 bun-debug.log*
 
-# --------------------------------------------------
-# Environment Files
-# --------------------------------------------------
-
+# Environment files
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# Firebase / Secret configs
+# Firebase / local config
+.firebase/
 firebase-debug.log
+firebase-debug.*
 .firebaserc.local
 
-# --------------------------------------------------
-# IDE / Editor
-# --------------------------------------------------
-
+# IDE / editor
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
-
 .idea/
 *.suo
 *.ntvs*
@@ -57,91 +41,37 @@ firebase-debug.log
 *.sln
 *.sw?
 
-# --------------------------------------------------
-# OS Files
-# --------------------------------------------------
-
+# OS files
 .DS_Store
 Thumbs.db
 desktop.ini
 
-# --------------------------------------------------
 # Cache
-# --------------------------------------------------
-
 .cache/
 .parcel-cache/
 .turbo/
 .eslintcache
 
-# --------------------------------------------------
 # TypeScript
-# --------------------------------------------------
-
 *.tsbuildinfo
 
-# --------------------------------------------------
 # Testing
-# --------------------------------------------------
-
 playwright-report/
 test-results/
 cypress/videos/
 cypress/screenshots/
 
-# --------------------------------------------------
-# Firebase
-# --------------------------------------------------
-
-.firebase/
-firebase-debug.*
-.firestore/
-
-# --------------------------------------------------
 # Vercel / Netlify
-# --------------------------------------------------
-
 .vercel/
 .netlify/
 
-# --------------------------------------------------
-# Uploads / Temporary Files
-# --------------------------------------------------
-
+# Temporary files
 uploads/
 temp/
 tmp/
 
-# --------------------------------------------------
-# Generated Files
-# --------------------------------------------------
-
-*.local
-*.pem
-*.key
-
-# --------------------------------------------------
-# Package Managers
-# --------------------------------------------------
-
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
-bun.lockb
-
-# --------------------------------------------------
-# Misc
-# --------------------------------------------------
-
+# Generated files
 *.zip
 *.tar
 *.gz
 *.rar
-
-# --------------------------------------------------
-# Optional AI / Claude / Cursor
-# --------------------------------------------------
-
-.cursor/
-.claude/
-.ai/
