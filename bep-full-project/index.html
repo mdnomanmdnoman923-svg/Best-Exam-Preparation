@@ -1,25 +1,420 @@
+<!-- bep-full-project/index.html -->
+
 <!DOCTYPE html>
-<html lang="bn" class="dark">
+<html lang="en" data-theme="dark">
   <head>
+    <!-- ------------------------------------------------------------------ -->
+    <!-- Meta                                                               -->
+    <!-- ------------------------------------------------------------------ -->
+
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#060b14" />
-    <meta name="description" content="BEP - Best Exam Preparation | বাংলাদেশের সেরা পরীক্ষা প্রস্তুতি প্ল্যাটফর্ম" />
-    <meta property="og:title" content="BEP - Best Exam Preparation" />
-    <meta property="og:description" content="বাংলাদেশের সেরা পরীক্ষা প্রস্তুতি প্ল্যাটফর্ম — প্রশ্নব্যাংক, মক টেস্ট, AI সহকারী" />
-    <meta property="og:image" content="/og-image.png" />
-    <!-- Bengali + Display fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+
+    <meta
+      http-equiv="X-UA-Compatible"
+      content="IE=edge"
+    />
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- SEO                                                                -->
+    <!-- ------------------------------------------------------------------ -->
+
+    <title>
+      BEP — Bengali Education Platform
+    </title>
+
+    <meta
+      name="title"
+      content="BEP — Bengali Education Platform"
+    />
+
+    <meta
+      name="description"
+      content="BEP is a modern Bengali-first EdTech platform for Bangladesh students. Practice questions, mock tests, AI study assistant, analytics, leaderboard, and more."
+    />
+
+    <meta
+      name="keywords"
+      content="BEP, Bengali Education Platform, Bangladesh EdTech, AI Learning Platform, Mock Tests, Question Bank, Practice App, Study Platform"
+    />
+
+    <meta
+      name="author"
+      content="BEP Team"
+    />
+
+    <meta
+      name="robots"
+      content="index, follow"
+    />
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- Theme Color                                                        -->
+    <!-- ------------------------------------------------------------------ -->
+
+    <meta
+      name="theme-color"
+      content="#050816"
+    />
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- Open Graph                                                         -->
+    <!-- ------------------------------------------------------------------ -->
+
+    <meta
+      property="og:type"
+      content="website"
+    />
+
+    <meta
+      property="og:title"
+      content="BEP — Bengali Education Platform"
+    />
+
+    <meta
+      property="og:description"
+      content="Modern Bengali-first AI-powered education platform for students in Bangladesh."
+    />
+
+    <meta
+      property="og:image"
+      content="/og-cover.png"
+    />
+
+    <meta
+      property="og:url"
+      content="https://bep-platform.com"
+    />
+
+    <meta
+      property="og:site_name"
+      content="BEP"
+    />
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- Twitter                                                            -->
+    <!-- ------------------------------------------------------------------ -->
+
+    <meta
+      name="twitter:card"
+      content="summary_large_image"
+    />
+
+    <meta
+      name="twitter:title"
+      content="BEP — Bengali Education Platform"
+    />
+
+    <meta
+      name="twitter:description"
+      content="AI-powered Bengali-first learning platform for students."
+    />
+
+    <meta
+      name="twitter:image"
+      content="/og-cover.png"
+    />
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- Icons                                                              -->
+    <!-- ------------------------------------------------------------------ -->
+
     <link
-      href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="icon"
+      type="image/svg+xml"
+      href="/favicon.svg"
+    />
+
+    <link
+      rel="apple-touch-icon"
+      href="/apple-touch-icon.png"
+    />
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- Fonts                                                              -->
+    <!-- ------------------------------------------------------------------ -->
+
+    <link
+      rel="preconnect"
+      href="https://fonts.googleapis.com"
+    />
+
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
       rel="stylesheet"
     />
-    <title>BEP — Best Exam Preparation</title>
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- PWA                                                                -->
+    <!-- ------------------------------------------------------------------ -->
+
+    <link
+      rel="manifest"
+      href="/manifest.json"
+    />
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- Preload                                                            -->
+    <!-- ------------------------------------------------------------------ -->
+
+    <link
+      rel="preload"
+      href="/src/main.tsx"
+      as="script"
+    />
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- Splash Loader Styles                                               -->
+    <!-- ------------------------------------------------------------------ -->
+
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+
+        width: 100%;
+        min-height: 100vh;
+
+        background:
+          radial-gradient(
+            circle at top left,
+            rgba(34, 211, 238, 0.12),
+            transparent 28%
+          ),
+          radial-gradient(
+            circle at bottom right,
+            rgba(168, 85, 247, 0.1),
+            transparent 24%
+          ),
+          #050816;
+
+        color: white;
+
+        font-family:
+          Inter,
+          system-ui,
+          sans-serif;
+
+        overflow-x: hidden;
+      }
+
+      #root {
+        min-height: 100vh;
+      }
+
+      .bep-loader {
+        position: fixed;
+        inset: 0;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+
+        gap: 20px;
+
+        background:
+          radial-gradient(
+            circle at center,
+            rgba(34, 211, 238, 0.08),
+            transparent 40%
+          ),
+          #050816;
+
+        z-index: 9999;
+      }
+
+      .bep-loader-logo {
+        width: 84px;
+        height: 84px;
+
+        border-radius: 24px;
+
+        background:
+          linear-gradient(
+            135deg,
+            #22d3ee,
+            #a855f7
+          );
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        font-size: 2rem;
+        font-weight: 800;
+
+        box-shadow:
+          0 0 40px rgba(34, 211, 238, 0.25);
+
+        animation:
+          loader-float 3s ease-in-out infinite,
+          loader-glow 2.5s ease-in-out infinite;
+      }
+
+      .bep-loader-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+
+        letter-spacing: -0.03em;
+      }
+
+      .bep-loader-subtitle {
+        color: rgba(255, 255, 255, 0.68);
+
+        font-size: 0.92rem;
+      }
+
+      .bep-loader-bar {
+        width: 220px;
+        height: 8px;
+
+        border-radius: 999px;
+
+        overflow: hidden;
+
+        background:
+          rgba(255, 255, 255, 0.08);
+
+        position: relative;
+      }
+
+      .bep-loader-progress {
+        position: absolute;
+        inset: 0;
+
+        width: 40%;
+
+        border-radius: inherit;
+
+        background:
+          linear-gradient(
+            90deg,
+            #22d3ee,
+            #a855f7
+          );
+
+        animation:
+          loader-progress 1.6s ease infinite;
+      }
+
+      @keyframes loader-progress {
+        0% {
+          transform: translateX(-120%);
+        }
+
+        100% {
+          transform: translateX(320%);
+        }
+      }
+
+      @keyframes loader-float {
+        0% {
+          transform: translateY(0);
+        }
+
+        50% {
+          transform: translateY(-8px);
+        }
+
+        100% {
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes loader-glow {
+        0% {
+          box-shadow:
+            0 0 20px rgba(34, 211, 238, 0.15);
+        }
+
+        50% {
+          box-shadow:
+            0 0 50px rgba(34, 211, 238, 0.32);
+        }
+
+        100% {
+          box-shadow:
+            0 0 20px rgba(34, 211, 238, 0.15);
+        }
+      }
+
+      @media (max-width: 640px) {
+        .bep-loader-logo {
+          width: 72px;
+          height: 72px;
+
+          font-size: 1.7rem;
+        }
+
+        .bep-loader-title {
+          font-size: 1rem;
+        }
+
+        .bep-loader-subtitle {
+          font-size: 0.85rem;
+        }
+
+        .bep-loader-bar {
+          width: 180px;
+        }
+      }
+    </style>
   </head>
-  <body class="bg-bep-bg text-bep-text font-display antialiased">
-    <div id="root"></div>
-    <script type="module" src="/src/app/main.tsx"></script>
+
+  <body>
+    <!-- ------------------------------------------------------------------ -->
+    <!-- App Root                                                           -->
+    <!-- ------------------------------------------------------------------ -->
+
+    <div id="root">
+      <!-- Initial Loading UI -->
+
+      <div class="bep-loader">
+        <div class="bep-loader-logo">
+          BEP
+        </div>
+
+        <div class="bep-loader-title">
+          Bengali Education Platform
+        </div>
+
+        <div class="bep-loader-subtitle">
+          AI-powered smart learning experience
+        </div>
+
+        <div class="bep-loader-bar">
+          <div class="bep-loader-progress"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- Main Entry                                                         -->
+    <!-- ------------------------------------------------------------------ -->
+
+    <script
+      type="module"
+      src="/src/main.tsx"
+    ></script>
   </body>
 </html>
