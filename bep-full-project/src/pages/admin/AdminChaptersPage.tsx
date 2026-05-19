@@ -419,4 +419,4 @@ export default function AdminChaptersPage() {
       await loadData();
       setConfirmDelete(null);
     } catch (error) {
-      console.error('Failed to delete chapter', error
+      console.error('Failed to delete chapter', error);
