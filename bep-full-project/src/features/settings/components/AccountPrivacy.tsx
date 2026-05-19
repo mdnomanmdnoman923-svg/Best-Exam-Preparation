@@ -1,251 +1,345 @@
 // bep-full-project/src/features/settings/components/AccountPrivacy.tsx
 
-import React, { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+
 import { motion } from 'framer-motion';
+
 import {
-  Activity,
-  BadgeCheck,
-  BrainCircuit,
   Eye,
   EyeOff,
-  Globe2,
+  Globe,
   Lock,
-  MessageCircle,
-  ShieldCheck,
-  Sparkles,
-  Trophy,
+  Shield,
   Users,
 } from 'lucide-react';
 
-import Badge from '@/components/ui/Badge';
-import Button from '@/components/ui/Button';
+interface PrivacySetting {
+  id: string;
 
-export type PrivacyVisibility = 'public' | 'followers' | 'private';
-export type ActivityVisibility = 'public' | 'limited' | 'private';
-
-export interface PrivacySettingsValue {
-  profileVisibility: PrivacyVisibility;
-  showLeaderboardRank: boolean;
-  showStudyActivity: boolean;
-  showBookmarks: boolean;
-  allowSearchEngineIndexing: boolean;
-  allowAiPersonalization: boolean;
-  allowCommunityMessages: boolean;
-  showOnlineStatus: boolean;
-  shareProgressWithTeachers: boolean;
-  dataAnalyticsOptIn: boolean;
-  twoFactorEnabled: boolean;
-  loginAlertsEnabled: boolean;
-}
-
-export interface PrivacySettingsMeta {
-  label: string;
-  description: string;
-}
-
-export interface AccountPrivacyProps {
-  title?: string;
-  subtitle?: string;
-  value: PrivacySettingsValue;
-  loading?: boolean;
-  saving?: boolean;
-  compact?: boolean;
-  onChange: (value: PrivacySettingsValue) => void;
-  onSave?: () => void;
-  onReset?: () => void;
-  onDeleteAccount?: () => void;
-  className?: string;
-}
-
-const defaultValue: PrivacySettingsValue = {
-  profileVisibility: 'private',
-  showLeaderboardRank: false,
-  showStudyActivity: false,
-  showBookmarks: false,
-  allowSearchEngineIndexing: false,
-  allowAiPersonalization: true,
-  allowCommunityMessages: true,
-  showOnlineStatus: false,
-  shareProgressWithTeachers: false,
-  dataAnalyticsOptIn: true,
-  twoFactorEnabled: false,
-  loginAlertsEnabled: true,
-};
-
-function getVisibilityMeta(value: PrivacyVisibility): PrivacySettingsMeta {
-  switch (value) {
-    case 'public':
-      return {
-        label: 'Public',
-        description: 'Anyone can see your profile and basic activity.',
-      };
-    case 'followers':
-      return {
-        label: 'Followers',
-        description: 'Only connected users can view your profile.',
-      };
-    case 'private':
-    default:
-      return {
-        label: 'Private',
-        description: 'Only you can see your profile details.',
-      };
-  }
-}
-
-function getActivityMeta(value: ActivityVisibility): PrivacySettingsMeta {
-  switch (value) {
-    case 'public':
-      return {
-        label: 'Public',
-        description: 'Your learning activity is visible to everyone.',
-      };
-    case 'limited':
-      return {
-        label: 'Limited',
-        description: 'Only summary stats are visible publicly.',
-      };
-    case 'private':
-    default:
-      return {
-        label: 'Private',
-        description: 'No activity is shown publicly.',
-      };
-  }
-}
-
-function ToggleRow({
-  title,
-  description,
-  icon,
-  checked,
-  onToggle,
-  disabled,
-  danger = false,
-}: {
   title: string;
   description: string;
+
+  enabled: boolean;
+
   icon: React.ReactNode;
-  checked: boolean;
-  onToggle: (next: boolean) => void;
-  disabled?: boolean;
-  danger?: boolean;
-}) {
-  return (
-    <div
-      className={[
-        'rounded-[26px] border p-5 backdrop-blur-xl transition-all duration-300',
-        checked
-          ? danger
-            ? 'border-red-400/20 bg-red-400/10'
-            : 'border-cyan-400/20 bg-cyan-400/10'
-          : 'border-white/10 bg-white/[0.04]',
-        disabled ? 'opacity-60' : '',
-      ].join(' ')}
-    >
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex min-w-0 gap-4">
-          <div
-            className={[
-              'flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border',
-              checked
-                ? danger
-                  ? 'border-red-400/20 bg-red-400/10 text-red-100'
-                  : 'border-cyan-400/20 bg-cyan-400/10 text-cyan-100'
-                : 'border-white/10 bg-white/[0.05] text-white/70',
-            ].join(' ')}
-          >
-            {icon}
-          </div>
-
-          <div className="min-w-0">
-            <h3 className="text-base font-semibold text-white">{title}</h3>
-            <p className="mt-1 text-sm leading-6 text-white/60">{description}</p>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => onToggle(!checked)}
-          disabled={disabled}
-          className={[
-            'relative inline-flex h-7 w-14 shrink-0 items-center rounded-full border transition-all duration-300',
-            checked
-              ? danger
-                ? 'border-red-400/20 bg-red-400/20'
-                : 'border-cyan-400/20 bg-cyan-400/20'
-              : 'border-white/10 bg-white/[0.04]',
-            disabled ? 'cursor-not-allowed' : 'hover:scale-[1.02]',
-          ].join(' ')}
-          aria-pressed={checked}
-          aria-label={title}
-        >
-          <span
-            className={[
-              'inline-block h-5 w-5 transform rounded-full shadow-lg transition-transform duration-300',
-              checked
-                ? 'translate-x-8 bg-white'
-                : 'translate-x-1 bg-white/65',
-            ].join(' ')}
-          />
-        </button>
-      </div>
-    </div>
-  );
 }
 
-function SelectionButton({
-  label,
-  description,
-  active,
-  onClick,
-}: {
-  label: string;
-  description: string;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={[
-        'rounded-[24px] border p-4 text-left transition-all duration-300',
-        active
-          ? 'border-cyan-400/20 bg-cyan-400/10 shadow-[0_10px_35px_rgba(6,182,212,0.14)]'
-          : 'border-white/10 bg-white/[0.04] hover:border-cyan-400/15 hover:bg-white/[0.06]',
-      ].join(' ')}
-    >
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <h4 className="text-sm font-semibold text-white">{label}</h4>
-          <p className="mt-1 text-xs leading-5 text-white/55">{description}</p>
-        </div>
+interface AccountPrivacyProps {
+  title?: string;
+  subtitle?: string;
 
-        <div
-          className={[
-            'flex h-5 w-5 items-center justify-center rounded-full border',
-            active
-              ? 'border-cyan-400/30 bg-cyan-400/20'
-              : 'border-white/10 bg-white/[0.04]',
-          ].join(' ')}
-        >
-          <div
-            className={[
-              'h-2.5 w-2.5 rounded-full transition-all duration-300',
-              active ? 'bg-cyan-100' : 'bg-transparent',
-            ].join(' ')}
-          />
-        </div>
-      </div>
-    </button>
-  );
+  loading?: boolean;
+  saving?: boolean;
+
+  compact?: boolean;
+
+  initialSettings?: {
+    publicProfile?: boolean;
+    showProgress?: boolean;
+    leaderboardVisible?: boolean;
+    allowMessages?: boolean;
+    showEmail?: boolean;
+  };
+
+  onSave?: (settings: {
+    publicProfile: boolean;
+    showProgress: boolean;
+    leaderboardVisible: boolean;
+    allowMessages: boolean;
+    showEmail: boolean;
+  }) => Promise<void> | void;
 }
 
 export default function AccountPrivacy({
   title = 'Account Privacy',
-  subtitle = 'আপনার profile, activity, এবং community visibility control করুন',
-  value,
+  subtitle = 'আপনার profile visibility এবং privacy controls manage করুন',
+
   loading = false,
   saving = false,
-  compact
+
+  compact = false,
+
+  initialSettings,
+
+  onSave,
+}: AccountPrivacyProps) {
+  const [publicProfile, setPublicProfile] = useState(
+    initialSettings?.publicProfile ?? true,
+  );
+
+  const [showProgress, setShowProgress] = useState(
+    initialSettings?.showProgress ?? true,
+  );
+
+  const [leaderboardVisible, setLeaderboardVisible] =
+    useState(
+      initialSettings?.leaderboardVisible ?? true,
+    );
+
+  const [allowMessages, setAllowMessages] =
+    useState(
+      initialSettings?.allowMessages ?? true,
+    );
+
+  const [showEmail, setShowEmail] = useState(
+    initialSettings?.showEmail ?? false,
+  );
+
+  const settings = useMemo<PrivacySetting[]>(
+    () => [
+      {
+        id: 'public-profile',
+        title: 'Public Profile',
+        description:
+          'অন্য users আপনার profile দেখতে পারবে',
+
+        enabled: publicProfile,
+
+        icon: publicProfile ? (
+          <Globe size={18} />
+        ) : (
+          <Lock size={18} />
+        ),
+      },
+
+      {
+        id: 'show-progress',
+        title: 'Show Study Progress',
+        description:
+          'Leaderboard এবং profile এ progress দেখাবে',
+
+        enabled: showProgress,
+
+        icon: showProgress ? (
+          <Eye size={18} />
+        ) : (
+          <EyeOff size={18} />
+        ),
+      },
+
+      {
+        id: 'leaderboard-visible',
+        title: 'Leaderboard Visibility',
+        description:
+          'Leaderboard ranking public থাকবে',
+
+        enabled: leaderboardVisible,
+
+        icon: <Users size={18} />,
+      },
+
+      {
+        id: 'allow-messages',
+        title: 'Allow Messages',
+        description:
+          'Community users আপনাকে message করতে পারবে',
+
+        enabled: allowMessages,
+
+        icon: <Shield size={18} />,
+      },
+
+      {
+        id: 'show-email',
+        title: 'Show Email',
+        description:
+          'আপনার email public profile এ visible থাকবে',
+
+        enabled: showEmail,
+
+        icon: showEmail ? (
+          <Eye size={18} />
+        ) : (
+          <EyeOff size={18} />
+        ),
+      },
+    ],
+    [
+      publicProfile,
+      showProgress,
+      leaderboardVisible,
+      allowMessages,
+      showEmail,
+    ],
+  );
+
+  const handleToggle = (id: string) => {
+    switch (id) {
+      case 'public-profile':
+        setPublicProfile((prev) => !prev);
+        break;
+
+      case 'show-progress':
+        setShowProgress((prev) => !prev);
+        break;
+
+      case 'leaderboard-visible':
+        setLeaderboardVisible((prev) => !prev);
+        break;
+
+      case 'allow-messages':
+        setAllowMessages((prev) => !prev);
+        break;
+
+      case 'show-email':
+        setShowEmail((prev) => !prev);
+        break;
+
+      default:
+        break;
+    }
+  };
+
+  const handleSave = async () => {
+    if (!onSave) return;
+
+    await onSave({
+      publicProfile,
+      showProgress,
+      leaderboardVisible,
+      allowMessages,
+      showEmail,
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-6 w-48 rounded bg-white/10" />
+
+          <div className="h-4 w-72 rounded bg-white/5" />
+
+          <div className="space-y-3 pt-4">
+            {[1, 2, 3].map((item) => (
+              <div
+                key={item}
+                className="h-20 rounded-2xl bg-white/[0.03]"
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <motion.section
+      initial={{
+        opacity: 0,
+        y: 16,
+      }}
+      animate={{
+        opacity: 1,
+        y: 0,
+      }}
+      transition={{
+        duration: 0.3,
+      }}
+      className="rounded-3xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-xl"
+    >
+      {/* Header */}
+
+      <div className="flex flex-col gap-2">
+        <h2 className="text-2xl font-bold text-white">
+          {title}
+        </h2>
+
+        <p className="max-w-2xl text-sm text-white/60">
+          {subtitle}
+        </p>
+      </div>
+
+      {/* Settings */}
+
+      <div
+        className={`mt-6 grid gap-4 ${
+          compact
+            ? 'grid-cols-1'
+            : 'grid-cols-1 md:grid-cols-2'
+        }`}
+      >
+        {settings.map((setting) => (
+          <motion.div
+            key={setting.id}
+            whileHover={{
+              y: -2,
+            }}
+            className="rounded-2xl border border-white/10 bg-white/[0.03] p-5"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex gap-4">
+                <div
+                  className={`flex h-11 w-11 items-center justify-center rounded-2xl ${
+                    setting.enabled
+                      ? 'bg-cyan-400/15 text-cyan-300'
+                      : 'bg-white/5 text-white/50'
+                  }`}
+                >
+                  {setting.icon}
+                </div>
+
+                <div>
+                  <h3 className="text-base font-semibold text-white">
+                    {setting.title}
+                  </h3>
+
+                  <p className="mt-1 text-sm leading-relaxed text-white/55">
+                    {setting.description}
+                  </p>
+                </div>
+              </div>
+
+              {/* Toggle */}
+
+              <button
+                type="button"
+                onClick={() =>
+                  handleToggle(setting.id)
+                }
+                className={`relative h-7 w-14 rounded-full transition-all duration-300 ${
+                  setting.enabled
+                    ? 'bg-cyan-400'
+                    : 'bg-white/10'
+                }`}
+              >
+                <span
+                  className={`absolute top-1 h-5 w-5 rounded-full bg-white transition-all duration-300 ${
+                    setting.enabled
+                      ? 'left-8'
+                      : 'left-1'
+                  }`}
+                />
+              </button>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Footer */}
+
+      <div className="mt-8 flex items-center justify-between gap-4 border-t border-white/10 pt-6">
+        <div>
+          <h4 className="text-sm font-medium text-white">
+            Privacy Status
+          </h4>
+
+          <p className="mt-1 text-xs text-white/50">
+            আপনার privacy settings securely encrypted
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={saving}
+          className="rounded-2xl bg-cyan-400 px-5 py-3 text-sm font-semibold text-black transition-all duration-300 hover:scale-[1.02] hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {saving
+            ? 'Saving...'
+            : 'Save Changes'}
+        </button>
+      </div>
+    </motion.section>
+  );
+}
