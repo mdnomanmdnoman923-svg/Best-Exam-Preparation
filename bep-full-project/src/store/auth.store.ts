@@ -1,38 +1,120 @@
-import { create } from 'zustand'
-import { devtools } from 'zustand/middleware'
-import type { AuthUser, AuthStatus } from '@/types/auth.types'
-import type { UserRole } from '@/types/profile.types'
+// bep-full-project/src/store/auth.store.ts
+
+import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+
+import type { User } from 'firebase/auth';
+
+import type { AuthProfile } from '@/services/auth.service';
 
 interface AuthState {
-  user: AuthUser | null
-  role: UserRole | null
-  status: AuthStatus
-  // Actions
-  setUser: (user: AuthUser | null) => void
-  setRole: (role: UserRole | null) => void
-  setStatus: (status: AuthStatus) => void
-  reset: () => void
+  user: User | null;
+  profile: AuthProfile | null;
+
+  loading: boolean;
+  initialized: boolean;
+
+  accessToken: string | null;
+
+  setUser: (user: User | null) => void;
+  setProfile: (profile: AuthProfile | null) => void;
+
+  setLoading: (loading: boolean) => void;
+  setInitialized: (initialized: boolean) => void;
+
+  setAccessToken: (token: string | null) => void;
+
+  clearAuth: () => void;
+
+  isAuthenticated: () => boolean;
+  isAdmin: () => boolean;
 }
 
+const initialState = {
+  user: null,
+  profile: null,
+
+  loading: true,
+  initialized: false,
+
+  accessToken: null,
+};
+
 export const useAuthStore = create<AuthState>()(
-  devtools(
-    (set) => ({
-      user: null,
-      role: null,
-      status: 'idle',
+  persist(
+    (set, get) => ({
+      ...initialState,
 
-      setUser: (user) => set({ user }, false, 'auth/setUser'),
-      setRole: (role) => set({ role }, false, 'auth/setRole'),
-      setStatus: (status) => set({ status }, false, 'auth/setStatus'),
-      reset: () => set({ user: null, role: null, status: 'unauthenticated' }, false, 'auth/reset'),
+      setUser: (user) => {
+        set({ user });
+      },
+
+      setProfile: (profile) => {
+        set({ profile });
+      },
+
+      setLoading: (loading) => {
+        set({ loading });
+      },
+
+      setInitialized: (initialized) => {
+        set({ initialized });
+      },
+
+      setAccessToken: (token) => {
+        set({ accessToken: token });
+      },
+
+      clearAuth: () => {
+        set({
+          ...initialState,
+          loading: false,
+          initialized: true,
+        });
+      },
+
+      isAuthenticated: () => {
+        return Boolean(get().user);
+      },
+
+      isAdmin: () => {
+        const role = get().profile?.role;
+
+        return role === 'admin' || role === 'super_admin';
+      },
     }),
-    { name: 'AuthStore' }
-  )
-)
+    {
+      name: 'bep-auth-storage',
 
-// Derived selectors
-export const selectIsAdmin = (state: AuthState) =>
-  state.role?.role === 'admin' || state.role?.role === 'superadmin'
+      storage: createJSONStorage(() => localStorage),
 
-export const selectIsAuthenticated = (state: AuthState) =>
-  state.status === 'authenticated' && state.user !== null
+      partialize: (state) => ({
+        profile: state.profile,
+        accessToken: state.accessToken,
+      }),
+    },
+  ),
+);
+
+/* -------------------------------------------------------------------------- */
+/*                               Helper Selectors                             */
+/* -------------------------------------------------------------------------- */
+
+export const authSelectors = {
+  user: (state: AuthState) => state.user,
+
+  profile: (state: AuthState) => state.profile,
+
+  loading: (state: AuthState) => state.loading,
+
+  initialized: (state: AuthState) => state.initialized,
+
+  accessToken: (state: AuthState) => state.accessToken,
+
+  isAuthenticated: (state: AuthState) =>
+    Boolean(state.user),
+
+  isAdmin: (state: AuthState) =>
+    state.profile?.role === 'admin' ||
+    state.profile?.role === 'super_admin',
+};
