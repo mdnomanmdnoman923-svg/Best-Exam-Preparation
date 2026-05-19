@@ -1,19 +1,126 @@
+// bep-full-project/storage.rules
+
 rules_version = '2';
+
 service firebase.storage {
   match /b/{bucket}/o {
 
-    match /avatars/{uid}/{allPaths=**} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null
-        && request.auth.uid == uid
-        && request.resource.size < 5 * 1024 * 1024
-        && request.resource.contentType.matches('image/.*');
+    /* ---------------------------------------------------------------------- */
+    /*                               Helpers                                  */
+    /* ---------------------------------------------------------------------- */
+
+    function isAuthenticated() {
+      return request.auth != null;
     }
 
-    match /questions/{questionId}/{allPaths=**} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null
-        && firestore.get(/databases/(default)/documents/userRoles/$(request.auth.uid)).data.role in ['admin','superadmin'];
+    function isOwner(userId) {
+      return isAuthenticated() &&
+        request.auth.uid == userId;
+    }
+
+    /* ---------------------------------------------------------------------- */
+    /*                              Profile Images                            */
+    /* ---------------------------------------------------------------------- */
+
+    match /profiles/{userId}/{allPaths=**} {
+
+      allow read: if true;
+
+      allow write: if
+        isOwner(userId) &&
+        request.resource.size < 5 * 1024 * 1024 &&
+        request.resource.contentType.matches('image/.*');
+    }
+
+    /* ---------------------------------------------------------------------- */
+    /*                           Community Uploads                            */
+    /* ---------------------------------------------------------------------- */
+
+    match /community/{userId}/{allPaths=**} {
+
+      allow read: if true;
+
+      allow write: if
+        isOwner(userId) &&
+        request.resource.size < 20 * 1024 * 1024 &&
+        (
+          request.resource.contentType.matches('image/.*') ||
+          request.resource.contentType.matches('video/.*') ||
+          request.resource.contentType.matches('application/pdf')
+        );
+    }
+
+    /* ---------------------------------------------------------------------- */
+    /*                             Question Assets                            */
+    /* ---------------------------------------------------------------------- */
+
+    match /questions/{allPaths=**} {
+
+      allow read: if true;
+
+      allow write: if
+        isAuthenticated() &&
+        (
+          request.resource.contentType.matches('image/.*') ||
+          request.resource.contentType.matches('application/pdf')
+        ) &&
+        request.resource.size < 10 * 1024 * 1024;
+    }
+
+    /* ---------------------------------------------------------------------- */
+    /*                              Subject Assets                            */
+    /* ---------------------------------------------------------------------- */
+
+    match /subjects/{allPaths=**} {
+
+      allow read: if true;
+
+      allow write: if
+        isAuthenticated() &&
+        request.resource.contentType.matches('image/.*') &&
+        request.resource.size < 5 * 1024 * 1024;
+    }
+
+    /* ---------------------------------------------------------------------- */
+    /*                               AI Uploads                               */
+    /* ---------------------------------------------------------------------- */
+
+    match /ai/{userId}/{allPaths=**} {
+
+      allow read, write: if
+        isOwner(userId) &&
+        request.resource.size < 15 * 1024 * 1024;
+    }
+
+    /* ---------------------------------------------------------------------- */
+    /*                             Admin Uploads                              */
+    /* ---------------------------------------------------------------------- */
+
+    match /admin/{allPaths=**} {
+
+      allow read: if isAuthenticated();
+
+      allow write: if isAuthenticated();
+    }
+
+    /* ---------------------------------------------------------------------- */
+    /*                               Public Files                             */
+    /* ---------------------------------------------------------------------- */
+
+    match /public/{allPaths=**} {
+
+      allow read: if true;
+
+      allow write: if isAuthenticated();
+    }
+
+    /* ---------------------------------------------------------------------- */
+    /*                               Catch All                                */
+    /* ---------------------------------------------------------------------- */
+
+    match /{allPaths=**} {
+
+      allow read, write: if false;
     }
   }
 }
